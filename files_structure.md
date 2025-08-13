@@ -1,3 +1,5 @@
+project files
+
 com/example/studentportal/
 │
 ├── config/
@@ -81,7 +83,7 @@ com/example/studentportal/
 
 
 
-
+rsources files
 
 
 resources/
