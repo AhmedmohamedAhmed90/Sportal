@@ -41,7 +41,7 @@ public class AuthController {
             cookie.setPath("/");
             response.addCookie(cookie);
 
-            return "redirect:/";
+            return "redirect:/home";
         } catch (Exception e) {
             model.addAttribute("error", "Invalid credentials");
             return "login";
