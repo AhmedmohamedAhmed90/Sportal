@@ -29,5 +29,16 @@ public class Comment {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @ManyToOne
+    @JoinColumn(name="material_id" , nullable = false)
+    private Material material;
+
+    @ManyToOne
+    @JoinColumn(name="submission_id" , nullable = false)
+    private Submission submission;
+
+
+
+
     // No direct relation to Material/Submission (handled manually in service)
 }
