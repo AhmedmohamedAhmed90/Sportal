@@ -51,4 +51,9 @@ public class User {
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Comment> comments;
+
+    public Role getRole() {
+        return this.role;
+    }
+
 }
