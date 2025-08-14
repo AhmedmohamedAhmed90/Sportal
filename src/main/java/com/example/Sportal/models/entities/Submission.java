@@ -1,4 +1,4 @@
-package com.example.Sportal.models;
+package com.example.Sportal.models.entities;
 
 
 import jakarta.persistence.*;
@@ -7,7 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "submissions")
@@ -44,6 +43,6 @@ public class Submission {
     @Column(columnDefinition = "TEXT")
     private String feedback;
 
-    @OneToMany(mappedBy = "submission", cascade = CascadeType.ALL)
-    private List<Comment> comments; // via polymorphic mapping
+//    @OneToMany(mappedBy = "submission", cascade = CascadeType.ALL)
+//    private List<Comment> comments;
 }

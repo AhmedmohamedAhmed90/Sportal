@@ -1,4 +1,4 @@
-package com.example.Sportal.models;
+package com.example.Sportal.models.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;

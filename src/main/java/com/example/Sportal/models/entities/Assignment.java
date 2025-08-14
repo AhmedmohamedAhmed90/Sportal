@@ -1,21 +1,17 @@
-package com.example.Sportal.models;
-
+package com.example.Sportal.models.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "materials")
+@Table(name = "assignments")
 @Data
-public class Material {
-
-    public enum Visibility {
-        PUBLIC, ENROLLED
-    }
+public class Assignment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,15 +27,12 @@ public class Material {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String filePath;
-    private String fileType;
-
-    @Enumerated(EnumType.STRING)
-    private Visibility visibility;
+    private LocalDateTime dueDate;
+    private BigDecimal maxScore;
 
     @CreationTimestamp
-    private LocalDateTime uploadedAt;
+    private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "material", cascade = CascadeType.ALL)
-    private List<Comment> comments; // via polymorphic mapping
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL)
+    private List<Submission> submissions;
 }
