@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Enrollments - Sportal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-graduation-cap me-2"></i>Sportal
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav" aria-controls="navbarNav"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/courses">
+                            <i class="fas fa-book me-1"></i>Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/enrollments">
+                            <i class="fas fa-user-graduate me-1"></i>My Enrollments
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>
+                            <span th:text="${user.name}">User</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/profile">
+                                <i class="fas fa-user-cog me-2"></i>Profile
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-2">
+                    <i class="fas fa-user-graduate me-2 text-primary"></i>My Enrollments
+                </h2>
+                <p class="text-muted">Manage your course enrollments and access materials</p>
+            </div>
+        </div>
+
+        <!-- Enrollments List -->
+        <div class="row" th:if="${enrollments and !enrollments.empty}">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Instructor</th>
+                                        <th>Status</th>
+                                        <th>Enrolled Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="enrollment : ${enrollments}">
+                                        <td>
+                                            <div>
+                                                <strong th:text="${enrollment.course.title}">Course Title</strong>
+                                                <br>
+                                                <small class="text-muted" th:text="${enrollment.course.code}">CS101</small>
+                                            </div>
+                                        </td>
+                                        <td th:text="${enrollment.course.instructor.name}">Instructor Name</td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${enrollment.status == 'ENROLLED' ? 'bg-success' : (enrollment.status == 'PENDING' ? 'bg-warning' : 'bg-danger')}"
+                                                  th:text="${enrollment.status}">ENROLLED</span>
+                                        </td>
+                                        <td th:text="${#temporals.format(enrollment.enrolledAt, 'MMM dd, yyyy')}">Jan 15, 2024</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/courses/{id}(id=${enrollment.course.id})}" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-eye me-1"></i>View
+                                                </a>
+                                                <button th:if="${enrollment.status == 'ENROLLED'}" 
+                                                        th:onclick="'dropCourse(' + ${enrollment.course.id} + ')'" 
+                                                        class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-times me-1"></i>Drop
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="text-center py-5" th:if="${!enrollments or enrollments.empty}">
+            <i class="fas fa-user-graduate fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">No enrollments yet</h4>
+            <p class="text-muted mb-4">You haven't enrolled in any courses yet. Browse available courses to get started!</p>
+            <a href="/courses" class="btn btn-primary btn-lg">
+                <i class="fas fa-search me-1"></i>Browse Courses
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center mt-5 py-4 bg-light border-top">
+        <p class="mb-0">&copy; Sportal - Student Portal System. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script>
+        function dropCourse(courseId) {
+            if (confirm('Are you sure you want to drop this course? This action cannot be undone.')) {
+                fetch(`/enrollments/drop/${courseId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to drop course. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

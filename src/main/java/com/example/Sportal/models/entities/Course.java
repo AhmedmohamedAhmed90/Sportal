@@ -12,6 +12,10 @@ import java.util.List;
 @Data
 public class Course {
 
+    public enum Visibility {
+        PUBLIC, PRIVATE
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,6 +37,10 @@ public class Course {
     private String semester;
 
     private Integer capacity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Visibility visibility = Visibility.PUBLIC;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

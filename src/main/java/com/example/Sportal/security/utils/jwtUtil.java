@@ -36,10 +36,17 @@ public class jwtUtil {
     public static boolean validateToken(String token ) {
         if (token == null || token.trim().isEmpty()) return false;
 
-        String[] parts = token.split("\\.");
-        if (parts.length != 3) return false;
-
-        return !isTokenExpired(token);
+        try {
+            // This will throw an exception if the token is invalid or expired
+            Jwts.parser()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            System.err.println("JWT validation error: " + e.getMessage());
+            return false;
+        }
     }
 
     public static String extractEmail(String token) {
