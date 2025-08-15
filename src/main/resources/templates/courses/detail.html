@@ -119,132 +119,132 @@
         </div>
 
         <!-- Course Content Tabs -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0">
-                        <ul class="nav nav-tabs card-header-tabs" id="courseTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab">
-                                    <i class="fas fa-file-alt me-1"></i>Materials
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation" th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">
-                                <button class="nav-link" id="enrollments-tab" data-bs-toggle="tab" data-bs-target="#enrollments" type="button" role="tab">
-                                    <i class="fas fa-users me-1"></i>Enrollments
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
-                                    <i class="fas fa-info-circle me-1"></i>Course Info
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                        <div class="tab-content" id="courseTabsContent">
-                            <!-- Materials Tab -->
-                            <div class="tab-pane fade show active" id="materials" role="tabpanel">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="mb-0">Course Materials</h5>
-                                    <button th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}" 
-                                            class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                                        <i class="fas fa-upload me-1"></i>Upload Material
-                                    </button>
-                                </div>
-                                
-                                <div th:if="${materials and !materials.empty}">
-                                    <div class="row">
-                                        <div class="col-md-6 col-lg-4 mb-3" th:each="material : ${materials}">
-                                            <div class="card h-100 border-0 shadow-sm">
-                                                <div class="card-body">
-                                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                                        <h6 class="card-title mb-0" th:text="${material.title}">Material Title</h6>
-                                                        <span class="badge" 
-                                                              th:classappend="${material.visibility == 'PUBLIC' ? 'bg-success' : 'bg-warning'}"
-                                                              th:text="${material.visibility}">PUBLIC</span>
-                                                    </div>
-                                                    <p class="card-text text-muted small" th:text="${material.description}">Description</p>
-                                                    <div class="mb-2">
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-file me-1"></i>
-                                                            <span th:text="${material.fileName}">filename.pdf</span>
-                                                        </small>
-                                                    </div>
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-calendar me-1"></i>
-                                                            <span th:text="${#temporals.format(material.uploadedAt, 'MMM dd')}">Jan 15</span>
-                                                        </small>
-                                                        <small class="text-muted" th:if="${material.fileSize}">
-                                                            <span th:text="${#numbers.formatDecimal(material.fileSize / 1024, 1, 1)} + ' KB'">1.2 KB</span>
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                                <div class="card-footer bg-white border-0">
-                                                    <div class="d-flex justify-content-between">
-                                                        <a th:href="@{/materials/{id}/download(id=${material.id})}" class="btn btn-outline-primary btn-sm">
-                                                            <i class="fas fa-download me-1"></i>Download
-                                                        </a>
-                                                        <div th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">
-                                                            <button th:onclick="'deleteMaterial(' + ${material.id} + ')'" class="btn btn-outline-danger btn-sm">
-                                                                <i class="fas fa-trash me-1"></i>Delete
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="text-center py-4" th:if="${!materials or materials.empty}">
-                                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                                    <h6 class="text-muted mb-2">No materials uploaded yet</h6>
-                                    <p class="text-muted small">Course materials will appear here once uploaded by the instructor.</p>
-                                </div>
-                            </div>
+<!--        <div class="row">-->
+<!--            <div class="col-12">-->
+<!--                <div class="card border-0 shadow-sm">-->
+<!--                    <div class="card-header bg-white border-0">-->
+<!--                        <ul class="nav nav-tabs card-header-tabs" id="courseTabs" role="tablist">-->
+<!--                            <li class="nav-item" role="presentation">-->
+<!--                                <button class="nav-link active" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab">-->
+<!--                                    <i class="fas fa-file-alt me-1"></i>Materials-->
+<!--                                </button>-->
+<!--                            </li>-->
+<!--                            <li class="nav-item" role="presentation" th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">-->
+<!--                                <button class="nav-link" id="enrollments-tab" data-bs-toggle="tab" data-bs-target="#enrollments" type="button" role="tab">-->
+<!--                                    <i class="fas fa-users me-1"></i>Enrollments-->
+<!--                                </button>-->
+<!--                            </li>-->
+<!--                            <li class="nav-item" role="presentation">-->
+<!--                                <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">-->
+<!--                                    <i class="fas fa-info-circle me-1"></i>Course Info-->
+<!--                                </button>-->
+<!--                            </li>-->
+<!--                        </ul>-->
+<!--                    </div>-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="tab-content" id="courseTabsContent">-->
+<!--                            &lt;!&ndash; Materials Tab &ndash;&gt;-->
+<!--                            <div class="tab-pane fade show active" id="materials" role="tabpanel">-->
+<!--                                <div class="d-flex justify-content-between align-items-center mb-3">-->
+<!--                                    <h5 class="mb-0">Course Materials</h5>-->
+<!--                                    <button th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}" -->
+<!--                                            class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">-->
+<!--                                        <i class="fas fa-upload me-1"></i>Upload Material-->
+<!--                                    </button>-->
+<!--                                </div>-->
+<!--                                -->
+<!--                                <div th:if="${materials and !materials.empty and materials != null}">-->
+<!--                                    <div class="row">-->
+<!--                                        <div class="col-md-6 col-lg-4 mb-3" th:each="material : ${materials}">-->
+<!--                                            <div class="card h-100 border-0 shadow-sm">-->
+<!--                                                <div class="card-body">-->
+<!--                                                    <div class="d-flex justify-content-between align-items-start mb-2">-->
+<!--                                                        <h6 class="card-title mb-0" th:text="${material.title}">Material Title</h6>-->
+<!--                                                        <span class="badge" -->
+<!--                                                              th:classappend="${material.visibility == 'PUBLIC' ? 'bg-success' : 'bg-warning'}"-->
+<!--                                                              th:text="${material.visibility}">PUBLIC</span>-->
+<!--                                                    </div>-->
+<!--                                                    <p class="card-text text-muted small" th:text="${material.description}">Description</p>-->
+<!--                                                    <div class="mb-2">-->
+<!--                                                        <small class="text-muted">-->
+<!--                                                            <i class="fas fa-file me-1"></i>-->
+<!--                                                            <span th:text="${material.fileName}">filename.pdf</span>-->
+<!--                                                        </small>-->
+<!--                                                    </div>-->
+<!--                                                    <div class="d-flex justify-content-between align-items-center">-->
+<!--                                                        <small class="text-muted">-->
+<!--                                                            <i class="fas fa-calendar me-1"></i>-->
+<!--                                                            <span th:text="${#temporals.format(material.uploadedAt, 'MMM dd')}">Jan 15</span>-->
+<!--                                                        </small>-->
+<!--                                                        <small class="text-muted" th:if="${material.fileSize}">-->
+<!--                                                            <span th:text="${#numbers.formatDecimal(material.fileSize / 1024, 1, 1)} + ' KB'">1.2 KB</span>-->
+<!--                                                        </small>-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                                <div class="card-footer bg-white border-0">-->
+<!--                                                    <div class="d-flex justify-content-between">-->
+<!--                                                        <a th:href="@{/materials/{id}/download(id=${material.id})}" class="btn btn-outline-primary btn-sm">-->
+<!--                                                            <i class="fas fa-download me-1"></i>Download-->
+<!--                                                        </a>-->
+<!--                                                        <div th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">-->
+<!--                                                            <button th:onclick="'deleteMaterial(' + ${material.id} + ')'" class="btn btn-outline-danger btn-sm">-->
+<!--                                                                <i class="fas fa-trash me-1"></i>Delete-->
+<!--                                                            </button>-->
+<!--                                                        </div>-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                -->
+<!--                                <div class="text-center py-4" th:if="${!materials or materials.empty}">-->
+<!--                                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>-->
+<!--                                    <h6 class="text-muted mb-2">No materials uploaded yet</h6>-->
+<!--                                    <p class="text-muted small">Course materials will appear here once uploaded by the instructor.</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
 
-                            <!-- Enrollments Tab -->
-                            <div class="tab-pane fade" id="enrollments" role="tabpanel" th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">
-                                <h5 class="mb-3">Student Enrollments</h5>
-                                <div th:if="${enrollments and !enrollments.empty}">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Student</th>
-                                                    <th>Email</th>
-                                                    <th>Status</th>
-                                                    <th>Enrolled Date</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr th:each="enrollment : ${enrollments}">
-                                                    <td th:text="${enrollment.student.name}">Student Name</td>
-                                                    <td th:text="${enrollment.student.email}">student@email.com</td>
-                                                    <td>
-                                                        <span class="badge" 
-                                                              th:classappend="${enrollment.status == 'ENROLLED' ? 'bg-success' : (enrollment.status == 'PENDING' ? 'bg-warning' : 'bg-danger')}"
-                                                              th:text="${enrollment.status}">ENROLLED</span>
-                                                    </td>
-                                                    <td th:text="${#temporals.format(enrollment.enrolledAt, 'MMM dd, yyyy')}">Jan 15, 2024</td>
-                                                    <td>
-                                                        <span class="badge" 
-                                                              th:classappend="${enrollment.status == 'ENROLLED' ? 'bg-success' : (enrollment.status == 'PENDING' ? 'bg-warning' : 'bg-danger')}"
-                                                              th:text="${enrollment.status}">ENROLLED</span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="text-center py-4" th:if="${!enrollments or enrollments.empty}">
-                                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                                    <h6 class="text-muted mb-2">No enrollments yet</h6>
-                                    <p class="text-muted small">Students will appear here once they enroll in your course.</p>
-                                </div>
-                            </div>
+<!--                            &lt;!&ndash; Enrollments Tab &ndash;&gt;-->
+<!--                            <div class="tab-pane fade" id="enrollments" role="tabpanel" th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">-->
+<!--                                <h5 class="mb-3">Student Enrollments</h5>-->
+<!--                                <div th:if="${enrollments and !enrollments.empty}">-->
+<!--                                    <div class="table-responsive">-->
+<!--                                        <table class="table table-hover">-->
+<!--                                            <thead>-->
+<!--                                                <tr>-->
+<!--                                                    <th>Student</th>-->
+<!--                                                    <th>Email</th>-->
+<!--                                                    <th>Status</th>-->
+<!--                                                    <th>Enrolled Date</th>-->
+<!--                                                </tr>-->
+<!--                                            </thead>-->
+<!--                                            <tbody>-->
+<!--                                                <tr th:each="enrollment : ${enrollments}">-->
+<!--                                                    <td th:text="${enrollment.student.name}">Student Name</td>-->
+<!--                                                    <td th:text="${enrollment.student.email}">student@email.com</td>-->
+<!--                                                    <td>-->
+<!--                                                        <span class="badge" -->
+<!--                                                              th:classappend="${enrollment.status == 'ENROLLED' ? 'bg-success' : (enrollment.status == 'PENDING' ? 'bg-warning' : 'bg-danger')}"-->
+<!--                                                              th:text="${enrollment.status}">ENROLLED</span>-->
+<!--                                                    </td>-->
+<!--                                                    <td th:text="${#temporals.format(enrollment.enrolledAt, 'MMM dd, yyyy')}">Jan 15, 2024</td>-->
+<!--                                                    <td>-->
+<!--                                                        <span class="badge" -->
+<!--                                                              th:classappend="${enrollment.status == 'ENROLLED' ? 'bg-success' : (enrollment.status == 'PENDING' ? 'bg-warning' : 'bg-danger')}"-->
+<!--                                                              th:text="${enrollment.status}">ENROLLED</span>-->
+<!--                                                    </td>-->
+<!--                                                </tr>-->
+<!--                                            </tbody>-->
+<!--                                        </table>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                <div class="text-center py-4" th:if="${!enrollments or enrollments.empty}">-->
+<!--                                    <i class="fas fa-users fa-3x text-muted mb-3"></i>-->
+<!--                                    <h6 class="text-muted mb-2">No enrollments yet</h6>-->
+<!--                                    <p class="text-muted small">Students will appear here once they enroll in your course.</p>-->
+<!--                                </div>-->
+<!--                            </div>-->
 
                             <!-- Course Info Tab -->
                             <div class="tab-pane fade" id="info" role="tabpanel">

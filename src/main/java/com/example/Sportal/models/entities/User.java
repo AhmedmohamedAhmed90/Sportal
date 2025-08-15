@@ -3,6 +3,7 @@ package com.example.Sportal.models.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+@ToString(exclude = {"coursesTaught", "enrollments", "submissions", "comments"})
 public class User {
 
     public enum Role {

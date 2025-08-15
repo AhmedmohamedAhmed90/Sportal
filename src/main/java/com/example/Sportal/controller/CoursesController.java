@@ -3,7 +3,9 @@ package com.example.Sportal.controller;
 import com.example.Sportal.models.dto.course.CourseDto;
 import com.example.Sportal.models.dto.course.CreateCourseRequest;
 import com.example.Sportal.models.dto.course.UpdateCourseRequest;
+import com.example.Sportal.models.entities.Course;
 import com.example.Sportal.models.entities.User;
+import com.example.Sportal.repository.CourseRepository;
 import com.example.Sportal.security.CustomUserDetails;
 import com.example.Sportal.service.CoursesService;
 import jakarta.validation.Valid;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +29,11 @@ public class CoursesController {
     @Autowired
     private CoursesService coursesService;
 
+    @Autowired
+    private CourseRepository courseRepository;
+
     @GetMapping
+    @Transactional
     public String listCourses(Model model) {
         try {
             User currentUser = getCurrentUser();
@@ -45,10 +52,27 @@ public class CoursesController {
                 } else {
                     courses = coursesService.getVisibleCoursesForUser(currentUser);
                 }
+                System.out.println("Courses fetched: " + (courses != null ? courses.size() : "null"));
+                System.out.println("Courses object: " + courses);
+                
+                // Ensure service didn't return null
+                if (courses == null) {
+                    System.out.println("Service returned null, creating empty list");
+                    courses = new ArrayList<>();
+                }
             } catch (Exception e) {
                 System.err.println("Error fetching courses: " + e.getMessage());
                 e.printStackTrace();
                 courses = new ArrayList<>();
+            }
+            
+            System.out.println("Final courses to be added to model: " + (courses != null ? courses.size() : "null"));
+            System.out.println("Final courses object: " + courses);
+            
+            // Ensure courses is never null
+            if (courses == null) {
+                courses = new ArrayList<>();
+                System.out.println("Courses was null, created new empty ArrayList");
             }
             
             model.addAttribute("courses", courses);
@@ -65,6 +89,7 @@ public class CoursesController {
     }
 
     @GetMapping("/create")
+    @Transactional
     public String createCourseForm(Model model) {
         try {
             User currentUser = getCurrentUser();
@@ -87,6 +112,7 @@ public class CoursesController {
     }
 
     @PostMapping
+    @Transactional
     public String createCourse(@Valid @ModelAttribute CreateCourseRequest createCourseRequest,
                               BindingResult bindingResult,
                               Model model,
@@ -119,47 +145,53 @@ public class CoursesController {
     }
 
     @GetMapping("/{id}")
-    public String courseDetail(@PathVariable Long id, Model model) {
+    @Transactional
+    public String viewCourse(@PathVariable Long id, Model model) {
         try {
             User currentUser = getCurrentUser();
             if (currentUser == null) {
                 return "redirect:/login";
             }
-            
+
             model.addAttribute("user", currentUser);
-            
+
             CourseDto course = coursesService.getCourseById(id);
-            model.addAttribute("course", course);
-            
-            boolean canAccess = course.getVisibility() == com.example.Sportal.models.entities.Course.Visibility.PUBLIC ||
-                    course.getInstructorId().equals(currentUser.getId()) ||
-                    coursesService.isStudentEnrolledInCourse(currentUser, id);
-            
-            if (!canAccess) {
-                model.addAttribute("error", "You don't have access to this course.");
+            if (course == null) {
+                model.addAttribute("error", "Course not found.");
                 return "error";
             }
-            
-            if (currentUser.getRole() == User.Role.STUDENT) {
-                boolean isEnrolled = false;
-                try {
-                    isEnrolled = coursesService.isStudentEnrolledInCourse(currentUser, id);
-                } catch (Exception e) {
-                    System.err.println("Error checking enrollment: " + e.getMessage());
+
+            model.addAttribute("course", course);
+
+            boolean canAccess = course.getVisibility() == Course.Visibility.PUBLIC;
+
+            if (!canAccess) {
+                // If course is private, check enrollment
+                boolean isEnrolled = coursesService.isStudentEnrolledInCourse(currentUser, id);
+                if (!isEnrolled) {
+                    model.addAttribute("error", "You don't have access to this course.");
+                    return "error";
                 }
+            }
+
+            // If user is a student, mark enrollment status
+            if (currentUser.getRole() == User.Role.STUDENT) {
+                boolean isEnrolled = coursesService.isStudentEnrolledInCourse(currentUser, id);
                 model.addAttribute("isEnrolled", isEnrolled);
             }
-            
+
             return "courses/detail";
         } catch (Exception e) {
             System.err.println("Error in courseDetail: " + e.getMessage());
             e.printStackTrace();
-            model.addAttribute("error", "Course not found.");
+            model.addAttribute("error", "An unexpected error occurred.");
             return "error";
         }
     }
 
+
     @GetMapping("/{id}/edit")
+    @Transactional
     public String editCourseForm(@PathVariable Long id, Model model) {
         try {
             User currentUser = getCurrentUser();
@@ -172,9 +204,9 @@ public class CoursesController {
             }
             
             CourseDto course = coursesService.getCourseById(id);
-            if (!course.getInstructorId().equals(currentUser.getId())) {
-                return "redirect:/courses";
-            }
+//            if (!course.getInstructorId().equals(currentUser.getId())) {
+//                return "redirect:/courses";
+//            }
             
             model.addAttribute("user", currentUser);
             model.addAttribute("course", course);
@@ -187,6 +219,7 @@ public class CoursesController {
     }
 
     @PostMapping("/{id}/edit")
+    @Transactional
     public String updateCourse(@PathVariable Long id, 
                               @Valid @ModelAttribute UpdateCourseRequest updateCourseRequest,
                               BindingResult bindingResult,
@@ -220,6 +253,7 @@ public class CoursesController {
     }
 
     @PostMapping("/{id}/delete")
+    @Transactional
     public String deleteCourse(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             User currentUser = getCurrentUser();

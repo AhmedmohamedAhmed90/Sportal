@@ -54,25 +54,40 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
+                // Validate token first
+                if (!jwtUtil.validateToken(token)) {
+                    System.err.println("JWT token validation failed");
+                    // Clear any invalid cookie
+                    if (request.getCookies() != null) {
+                        Arrays.stream(request.getCookies())
+                                .filter(c -> "JWT".equals(c.getName()))
+                                .findFirst()
+                                .ifPresent(c -> {
+                                    c.setMaxAge(0);
+                                    c.setPath("/");
+                                });
+                    }
+                    chain.doFilter(request, response);
+                    return;
+                }
+
                 String email = jwtUtil.extractEmail(token);
                 System.out.println("Extracted email: " + email);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 System.out.println("UserDetails loaded: " + userDetails.getUsername());
 
-                if (jwtUtil.validateToken(token)) {
-                    System.out.println("JWT token is valid");
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                    System.out.println("Authentication set in SecurityContextHolder");
-                } else {
-                    System.out.println("JWT token is invalid");
-                }
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+                System.out.println("Authentication set in SecurityContextHolder successfully");
+                
             } catch (Exception e) {
                 System.err.println("Error in JWT filter: " + e.getMessage());
                 e.printStackTrace();
+                // Clear invalid authentication context
+                SecurityContextHolder.clearContext();
             }
         } else if (token == null) {
             System.out.println("No JWT token found in request");

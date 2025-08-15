@@ -20,28 +20,41 @@ public class jwtUtil {
 
     private static final SecretKey SECRET_KEY =
             Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
-    private static final long EXPIRATION_TIME = 3600;
+    // Increased expiration time to 24 hours (86400 seconds)
+    private static final long EXPIRATION_TIME = 86400;
 
     public static String generateToken(String email, User.Role role) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role.name())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME * 1000))
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
 
 
     public static boolean validateToken(String token ) {
-        if (token == null || token.trim().isEmpty()) return false;
+        if (token == null || token.trim().isEmpty()) {
+            System.err.println("JWT validation error: Token is null or empty");
+            return false;
+        }
 
         try {
             // This will throw an exception if the token is invalid or expired
-            Jwts.parser()
+            Claims claims = Jwts.parser()
                 .setSigningKey(SECRET_KEY)
                 .build()
-                .parseClaimsJws(token);
+                .parseClaimsJws(token)
+                .getBody();
+            
+            // Check if token is expired
+            if (claims.getExpiration().before(new Date())) {
+                System.err.println("JWT validation error: Token has expired");
+                return false;
+            }
+            
+            System.out.println("JWT validation success for user: " + claims.getSubject());
             return true;
         } catch (Exception e) {
             System.err.println("JWT validation error: " + e.getMessage());

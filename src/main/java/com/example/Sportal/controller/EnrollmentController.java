@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -23,6 +24,7 @@ public class EnrollmentController {
     private EnrollmentService enrollmentService;
 
     @GetMapping
+    @Transactional
     public String listEnrollments(Model model) {
         try {
             User currentUser = getCurrentUser();
@@ -57,6 +59,7 @@ public class EnrollmentController {
     }
 
     @PostMapping("/enroll/{courseId}")
+    @Transactional
     public String enrollInCourse(@PathVariable Long courseId, RedirectAttributes redirectAttributes) {
         try {
             User currentUser = getCurrentUser();
@@ -82,6 +85,7 @@ public class EnrollmentController {
     }
 
     @PostMapping("/drop/{courseId}")
+    @Transactional
     public String dropCourse(@PathVariable Long courseId, RedirectAttributes redirectAttributes) {
         try {
             User currentUser = getCurrentUser();
@@ -107,6 +111,7 @@ public class EnrollmentController {
     }
 
     @PostMapping("/{enrollmentId}/status")
+    @Transactional
     public String updateEnrollmentStatus(
             @PathVariable Long enrollmentId,
             @RequestParam Enrollment.Status status,
@@ -138,13 +143,27 @@ public class EnrollmentController {
     private User getCurrentUser() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("=== EnrollmentController getCurrentUser Debug ===");
+            System.out.println("Authentication: " + authentication);
+            
+            if (authentication != null) {
+                System.out.println("Principal: " + authentication.getPrincipal());
+                System.out.println("Principal type: " + authentication.getPrincipal().getClass().getName());
+                System.out.println("Is authenticated: " + authentication.isAuthenticated());
+                System.out.println("Is anonymous: " + "anonymousUser".equals(authentication.getPrincipal()));
+            }
+            
             if (authentication != null && 
                 authentication.getPrincipal() instanceof CustomUserDetails && 
                 !"anonymousUser".equals(authentication.getPrincipal()) &&
                 authentication.isAuthenticated()) {
                 
-                return ((CustomUserDetails) authentication.getPrincipal()).getUser();
+                User user = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+                System.out.println("User retrieved: " + user.getName() + " (Role: " + user.getRole() + ")");
+                return user;
             }
+            
+            System.out.println("No valid authentication found - returning null");
             return null;
         } catch (Exception e) {
             System.err.println("Error getting current user: " + e.getMessage());
