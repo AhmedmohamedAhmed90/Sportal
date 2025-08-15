@@ -1,6 +1,7 @@
 package com.example.Sportal.controller;
 
 import com.example.Sportal.mapper.Mapper;
+import com.example.Sportal.models.dto.course.CourseDto;
 import com.example.Sportal.models.dto.user.UserDto;
 import com.example.Sportal.models.entities.User;
 import com.example.Sportal.service.UsersService;
@@ -8,15 +9,11 @@ import com.example.Sportal.service.CoursesService;
 import com.example.Sportal.service.EnrollmentService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -113,5 +110,23 @@ public class AdminController {
     public String deleteUser(@PathVariable Long id) {
         String result = usersService.deleteUserById(id);
         return "redirect:/admin/users?message=" + result;
+    }
+
+    @GetMapping("/admin/courses")
+    public String adminCourse(Model model){
+        model.addAttribute("courses",courseService.getAllCourses());
+        return "admin/courses";
+    }
+
+    @GetMapping("/admin/courses/create")
+    public String createCourse(Model model){
+        model.addAttribute("course", new CourseDto());
+        return "admin/course-form";
+    }
+
+    @GetMapping("/admin/courses/edit/{id}")
+    public String editCourse(Model model,@PathVariable Long id){
+        model.addAttribute("course",courseService.getCourseById(id));
+        return "admin/course-form";
     }
 }

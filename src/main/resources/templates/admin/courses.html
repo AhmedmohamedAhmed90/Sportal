@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses Management - Sportal Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/admin/dashboard">
+            <i class="fas fa-graduation-cap me-2"></i>Sportal Admin
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/dashboard">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/users">
+                        <i class="fas fa-users me-1"></i>Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/courses">
+                        <i class="fas fa-book me-1"></i>Courses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/enrollments">
+                        <i class="fas fa-user-check me-1"></i>Enrollments
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-shield me-1"></i>
+                        <span th:text="${admin.name}">Admin</span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/admin/profile">
+                            <i class="fas fa-user-cog me-2"></i>Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1"><i class="fas fa-book me-2 text-primary"></i>Courses Management</h2>
+                            <p class="text-muted mb-0">Manage all available courses and their details</p>
+                        </div>
+                        <a href="/admin/courses/create" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>Add New Course
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${param.success}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${param.error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="GET" action="/admin/courses" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="search" class="form-label">Search Courses</label>
+                            <input type="text" class="form-control" id="search" name="search"
+                                   placeholder="Search by course name or code..." th:value="${param.search}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="category" class="form-label">Filter by Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">All Categories</option>
+                                <option value="computer-science">Computer Science</option>
+                                <option value="mathematics">Mathematics</option>
+                                <option value="physics">Physics</option>
+                                <option value="chemistry">Chemistry</option>
+                                <option value="business">Business</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-search me-1"></i>Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2 text-primary"></i>Courses List
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div th:each="course : ${courses}" class="col-lg-6 col-xl-4 mb-4">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0" th:text="${course.name}">Course Name</h6>
+                                        <small class="text-muted" th:text="${course.code}">CS101</small>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                                th:id="'dropdownMenuButton' + ${course.id}" data-bs-toggle="dropdown">
+                                            Actions
+                                        </button>
+                                        <ul class="dropdown-menu" th:aria-labelledby="'dropdownMenuButton' + ${course.id}">
+                                            <li>
+                                                <a class="dropdown-item" th:href="@{/admin/courses/edit/{id}(id=${course.id})}">
+                                                    <i class="fas fa-edit me-2"></i>Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#"
+                                                   data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${course.id}">
+                                                    <i class="fas fa-trash me-2"></i>Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text text-muted mb-3" th:text="${course.description}">
+                                        Course description goes here. This is a brief overview of what students will learn.
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-info" th:text="${course.category}">Category</span>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            <span th:text="${course.duration}">12 weeks</span>
+                                        </small>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">
+                                            <i class="fas fa-users me-1"></i>
+                                            <span th:text="${course.enrolledCount ?: 0}">0</span> enrolled
+                                        </span>
+                                        <span class="fw-bold text-success" th:text="' + ${course.price}">$299</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            Instructor: <span th:text="${course.instructorName}">John Doe</span>
+                                        </small>
+                                        <span class="badge bg-success" th:if="${course.active}">Active</span>
+                                        <span class="badge bg-secondary" th:unless="${course.active}">Inactive</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${courses == null || courses.empty}" class="text-center py-5">
+                        <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No courses found</h5>
+                        <p class="text-muted mb-3">Start by creating your first course</p>
+                        <a href="/admin/courses/create" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>Create Course
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modals -->
+<div th:each="course : ${courses}" th:id="'deleteModal' + ${course.id}" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the course <strong th:text="${course.name}">Course Name</strong>?</p>
+                <p class="text-danger"><small>This action cannot be undone and will affect all enrolled students.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form th:action="@{/admin/courses/delete/{id}(id=${course.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center mt-5 py-4 bg-light border-top">
+    <p class="mb-0">&copy; Sportal - Student Portal System. All rights reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>

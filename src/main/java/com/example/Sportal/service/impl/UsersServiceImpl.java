@@ -82,8 +82,6 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public long getActiveUsersCount() {
-        // Simple implementation - just return total users
-        // You can add logic here if you have an 'active' field
         return userRepository.count();
     }
 
