@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 @Data
 @NoArgsConstructor
 public class UserDto {
+
+    private Long id;
+
     @NotBlank(message = "Name is required")
     private String name;
 
