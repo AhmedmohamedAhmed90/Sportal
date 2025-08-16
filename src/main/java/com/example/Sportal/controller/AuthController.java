@@ -1,13 +1,13 @@
 package com.example.Sportal.controller;
 
+
+
 import com.example.Sportal.models.entities.User;
 import com.example.Sportal.repository.UserRepository;
 import com.example.Sportal.security.utils.jwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,9 +32,7 @@ public class AuthController {
                         HttpServletResponse response, Model model) {
 
         try {
-            Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            
+            authManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
             User user = userRepo.findByEmail(email).get();
             String token = jwtUtil.generateToken(user.getEmail() , user.getRole());
 
@@ -43,16 +41,8 @@ public class AuthController {
             cookie.setPath("/");
             response.addCookie(cookie);
 
-            System.out.println("=== Login Success ===");
-            System.out.println("User: " + user.getName() + " (Role: " + user.getRole() + ")");
-            System.out.println("JWT Token generated: " + token.substring(0, Math.min(20, token.length())) + "...");
-            System.out.println("JWT Token length: " + token.length());
-            System.out.println("Authentication set in SecurityContextHolder");
-
-            return "redirect:/dashboard";
+            return "redirect:/";
         } catch (Exception e) {
-            System.err.println("Login error: " + e.getMessage());
-            e.printStackTrace();
             model.addAttribute("error", "Invalid credentials");
             return "login";
         }
@@ -80,22 +70,6 @@ public class AuthController {
         userRepo.save(user);
 
         return "redirect:/login";
-    }
-
-    
-
-    @GetMapping("/logout")
-    public String logout(HttpServletResponse response) {
-        SecurityContextHolder.clearContext();
-        
-        // Clear JWT cookie
-        Cookie cookie = new Cookie("JWT", "");
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-        
-        return "redirect:/";
     }
 }
 

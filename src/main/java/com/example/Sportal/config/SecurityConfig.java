@@ -28,7 +28,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/error", "/home", "/dashboard", "/enrollments", "/enrollments/**", "/materials/**").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/error", "/home", "/dashboard").permitAll()
+                        .requestMatchers("/courses/**", "/enrollments/**", "/materials/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(daoAuthenticationProvider())
