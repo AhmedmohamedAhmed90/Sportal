@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/error", "/home", "/dashboard").permitAll()
-                        .requestMatchers("/courses/**", "/enrollments/**", "/materials/**").authenticated()
+                        .requestMatchers("/courses/**", "/enrollments/**", "/materials/**","/admin/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(daoAuthenticationProvider())

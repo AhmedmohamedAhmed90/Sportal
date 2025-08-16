@@ -63,7 +63,7 @@
                         <h2 class="mb-3">Oops! Something went wrong</h2>
                         
                         <!-- Error Details -->
-                        <div class="text-start mb-4" th:if="${status or message or exception}">
+                        <div class="text-start mb-4" th:if="${status != null or message != null or exception != null}">
                             <h5 class="text-danger">Error Details:</h5>
                             <div class="bg-light p-3 rounded">
                                 <p th:if="${status}" class="mb-1">

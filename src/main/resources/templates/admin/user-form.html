@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Form - Sportal Admin</title>
+    <title th:text="${user.id != null ? 'Edit User' : 'Create User'} + ' - Sportal Admin'">User Form - Sportal Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -46,7 +46,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user-shield me-1"></i>
-                        <span th:text="${admin.name}">Admin</span>
+                        <span th:text="${session.user != null ? session.user.name : 'Admin'}">Admin</span>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="/admin/profile">
@@ -65,6 +65,19 @@
 
 <!-- Main Content -->
 <div class="container mt-4">
+    <!-- Breadcrumb -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/users">Users</a></li>
+                    <li class="breadcrumb-item active" th:text="${user.id != null ? 'Edit User' : 'Create User'}">Create User</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
     <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12">
@@ -73,10 +86,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h2 class="mb-1">
-                                <i class="fas fa-user-edit me-2 text-primary"></i>
+                                <i th:class="${user.id != null ? 'fas fa-user-edit' : 'fas fa-user-plus'} + ' me-2 text-primary'"></i>
                                 <span th:text="${user.id != null ? 'Edit User' : 'Create New User'}">Create New User</span>
                             </h2>
-                            <p class="text-muted mb-0">Fill in the details below to manage user information</p>
+                            <p class="text-muted mb-0" th:text="${user.id != null ? 'Update user information and settings' : 'Add a new user to the system'}">Add a new user to the system</p>
                         </div>
                         <a href="/admin/users" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-2"></i>Back to Users
@@ -87,128 +100,193 @@
         </div>
     </div>
 
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
     <!-- User Form -->
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+    <div class="row">
+        <div class="col-lg-8 col-xl-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-user me-2 text-primary"></i>User Information
+                        <i class="fas fa-user-cog me-2 text-primary"></i>User Information
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form th:object="${user}" action="/admin/users/save" method="post" class="needs-validation" novalidate>
-                        <!-- Hidden ID field for edit mode -->
-                        <input type="hidden" th:field="*{id}">
+                    <form th:action="${'/admin/users/save'}"
+                          method="post" th:object="${user}" enctype="multipart/form-data" novalidate>
 
-                        <div class="row">
-                            <!-- Name Field -->
-                            <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">
-                                    <i class="fas fa-user me-1"></i>Full Name <span class="text-danger">*</span>
-                                </label>
+                        <!-- Hidden ID field for edit mode -->
+                        <input type="hidden" th:field="*{id}" th:if="${user.id != null}">
+
+                        <!-- Name Field -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">
+                                Full Name <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user text-muted"></i>
+                                </span>
                                 <input type="text" class="form-control" id="name" th:field="*{name}"
                                        placeholder="Enter full name" required>
-                                <div class="invalid-feedback">
-                                    Please provide a valid name.
-                                </div>
                             </div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+                                Name is required
+                            </div>
+                        </div>
 
-                            <!-- Email Field -->
-                            <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">
-                                    <i class="fas fa-envelope me-1"></i>Email Address <span class="text-danger">*</span>
-                                </label>
+                        <!-- Email Field -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                Email Address <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-envelope text-muted"></i>
+                                </span>
                                 <input type="email" class="form-control" id="email" th:field="*{email}"
                                        placeholder="Enter email address" required>
-                                <div class="invalid-feedback">
-                                    Please provide a valid email address.
-                                </div>
+                            </div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+                                Valid email is required
                             </div>
                         </div>
 
-                        <div class="row">
-                            <!-- Password Field -->
-                            <div class="col-md-6 mb-3">
-                                <label for="password" class="form-label">
-                                    <i class="fas fa-lock me-1"></i>Password
-                                    <span th:if="${user.id == null}" class="text-danger">*</span>
-                                    <span th:if="${user.id != null}" class="text-muted">(Leave blank to keep current)</span>
-                                </label>
+                        <!-- Password Field -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                Password <span class="text-danger" th:if="${user.id == null}">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock text-muted"></i>
+                                </span>
                                 <input type="password" class="form-control" id="password" th:field="*{password}"
-                                       placeholder="Enter password" th:required="${user.id == null}">
-                                <div class="invalid-feedback">
-                                    Please provide a valid password (minimum 6 characters).
-                                </div>
+                                       th:placeholder="${user.id != null ? 'Leave blank to keep current password' : 'Enter password'}"
+                                       th:required="${user.id == null}" minlength="6">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">
+                                    <i class="fas fa-eye" id="password-eye"></i>
+                                </button>
                             </div>
+                            <div class="form-text" th:text="${user.id != null ? 'Leave blank to keep current password. Minimum 6 characters if changing.' : 'Password must be at least 6 characters long'}">Password must be at least 6 characters long</div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">
+                                Password is required
+                            </div>
+                        </div>
 
-                            <!-- Role Field -->
-                            <div class="col-md-6 mb-3">
-                                <label for="role" class="form-label">
-                                    <i class="fas fa-user-tag me-1"></i>Role <span class="text-danger">*</span>
-                                </label>
+                        <!-- Role Field -->
+                        <div class="mb-3">
+                            <label for="role" class="form-label">
+                                Role <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user-tag text-muted"></i>
+                                </span>
                                 <select class="form-select" id="role" th:field="*{role}" required>
-                                    <option value="">Select a role</option>
+                                    <option value="">Select Role</option>
                                     <option th:each="roleOption : ${roles}"
                                             th:value="${roleOption}"
-                                            th:text="${roleOption}">Role</option>
+                                            th:text="${roleOption}"
+                                            th:selected="${user.role == roleOption}">Role Option</option>
                                 </select>
-                                <div class="invalid-feedback">
-                                    Please select a role.
+                            </div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('role')}" th:errors="*{role}">
+                                Role is required
+                            </div>
+                        </div>
+
+                        <!-- Avatar Upload Field -->
+                        <div class="mb-4">
+                            <label for="avatar" class="form-label">Avatar</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <!-- Current Avatar Preview -->
+                                <div class="position-relative">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 80px; height: 80px;" id="avatarPreview">
+                                        <i class="fas fa-user fa-2x" th:if="${user.avatarPath == null or user.avatarPath.isEmpty()}"></i>
+                                        <img th:if="${user.avatarPath != null and !user.avatarPath.isEmpty()}"
+                                             th:src="@{'/uploads/avatars/' + ${user.avatarPath}}"
+                                             class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;"
+                                             alt="Current avatar">
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- Phone Field -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="phone" class="form-label">
-                                    <i class="fas fa-phone me-1"></i>Phone Number
-                                </label>
-                                <input type="tel" class="form-control" id="phone" th:field="*{phone}"
-                                       placeholder="Enter phone number">
-                            </div>
-                        </div>
-
-                        <!-- Submit Buttons -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a href="/admin/users" class="btn btn-secondary">
-                                        <i class="fas fa-times me-1"></i>Cancel
-                                    </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save me-1"></i>
-                                        <span th:text="${user.id != null ? 'Update User' : 'Create User'}">Create User</span>
+                                <!-- Upload Controls -->
+                                <div class="flex-grow-1">
+                                    <input type="file" class="form-control" id="avatar" name="avatarFile"
+                                           accept="image/*" onchange="previewAvatar(this)">
+                                    <div class="form-text">Upload a profile picture. Supported formats: JPG, PNG, GIF. Max size: 5MB</div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger mt-2"
+                                            onclick="removeAvatar()" th:if="${user.avatarPath != null and !user.avatarPath.isEmpty()}">
+                                        <i class="fas fa-trash me-1"></i>Remove Avatar
                                     </button>
                                 </div>
                             </div>
+                            <!-- Hidden field to track avatar removal -->
+                            <input type="hidden" id="removeAvatar" name="removeAvatar" value="false">
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i th:class="${user.id != null ? 'fas fa-save' : 'fas fa-user-plus'} + ' me-2'"></i>
+                                <span th:text="${user.id != null ? 'Update User' : 'Create User'}">Create User</span>
+                            </button>
+                            <a href="/admin/users" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Additional Information Card (for edit mode) -->
-    <div th:if="${user.id != null}" class="row justify-content-center mt-4">
-        <div class="col-lg-8">
+        <!-- Form Help/Information -->
+        <div class="col-lg-4 col-xl-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-info-circle me-2 text-info"></i>Additional Information
+                        <i class="fas fa-info-circle me-2 text-info"></i>Form Guidelines
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>User ID:</strong> <span th:text="${user.id}">#123</span></p>
-                            <p><strong>Created:</strong> Recently</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Status:</strong> <span class="badge bg-success">Active</span></p>
-                            <p><strong>Last Login:</strong> Today</p>
-                        </div>
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Required Fields</h6>
+                        <p class="text-muted small mb-0">Fields marked with <span class="text-danger">*</span> are required and must be filled out.</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Avatar Upload</h6>
+                        <ul class="list-unstyled small text-muted">
+                            <li><i class="fas fa-check text-success me-1"></i>Supported formats: JPG, PNG, GIF</li>
+                            <li><i class="fas fa-check text-success me-1"></i>Maximum file size: 5MB</li>
+                            <li><i class="fas fa-check text-success me-1"></i>Square images work best</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Password Requirements</h6>
+                        <ul class="list-unstyled small text-muted mb-0">
+                            <li><i class="fas fa-check text-success me-1"></i>Minimum 6 characters</li>
+                            <li><i class="fas fa-check text-success me-1"></i>Mix of letters and numbers recommended</li>
+                            <li><i class="fas fa-check text-success me-1"></i>Special characters allowed</li>
+                        </ul>
+                    </div>
+
+                    <div th:if="${user.id != null}">
+                        <h6 class="fw-bold">Edit Mode</h6>
+                        <p class="text-muted small mb-0">Leave password blank to keep the current password. Upload a new avatar to replace the current one.</p>
                     </div>
                 </div>
             </div>
@@ -218,18 +296,100 @@
 
 <!-- Footer -->
 <footer class="text-center mt-5 py-4 bg-light border-top">
-    <p class="mb-0">&copy; Sportal - Student Portal System. All rights reserved.</p>
+    <p class="mb-0">&copy; 2024 Sportal - Student Portal System. All rights reserved.</p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
 <script>
-    // Bootstrap form validation
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+        const passwordField = document.getElementById(fieldId);
+        const eyeIcon = document.getElementById(fieldId + '-eye');
+
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+        }
+    }
+
+    // Toggle password field visibility for edit mode
+    function togglePasswordField() {
+        const changePasswordCheckbox = document.getElementById('changePassword');
+        const newPasswordField = document.getElementById('newPasswordField');
+        const newPasswordInput = document.getElementById('newPassword');
+
+        if (changePasswordCheckbox && changePasswordCheckbox.checked) {
+            newPasswordField.style.display = 'block';
+            newPasswordInput.required = true;
+        } else {
+            newPasswordField.style.display = 'none';
+            newPasswordInput.required = false;
+            newPasswordInput.value = '';
+        }
+    }
+
+    // Avatar preview functionality
+    function previewAvatar(input) {
+        const file = input.files[0];
+        const preview = document.getElementById('avatarPreview');
+
+        if (file) {
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                input.value = '';
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                alert('Please select a valid image file');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;" alt="Avatar preview">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Remove avatar functionality
+    function removeAvatar() {
+        const preview = document.getElementById('avatarPreview');
+        const avatarInput = document.getElementById('avatar');
+        const removeAvatarInput = document.getElementById('removeAvatar');
+
+        // Reset preview to default
+        preview.innerHTML = '<i class="fas fa-user fa-2x"></i>';
+
+        // Clear file input
+        avatarInput.value = '';
+
+        // Mark for removal
+        removeAvatarInput.value = 'true';
+
+        // Hide remove button
+        const removeButton = document.querySelector('button[onclick="removeAvatar()"]');
+        if (removeButton) {
+            removeButton.style.display = 'none';
+        }
+    }
+
+    // Form validation
     (function() {
         'use strict';
         window.addEventListener('load', function() {
-            var forms = document.getElementsByClassName('needs-validation');
-            var validation = Array.prototype.filter.call(forms, function(form) {
+            const forms = document.getElementsByTagName('form');
+            Array.prototype.forEach.call(forms, function(form) {
                 form.addEventListener('submit', function(event) {
                     if (form.checkValidity() === false) {
                         event.preventDefault();
@@ -240,6 +400,30 @@
             });
         }, false);
     })();
+
+    // Character counter for bio field
+    document.getElementById('bio').addEventListener('input', function() {
+        const maxLength = 500;
+        const currentLength = this.value.length;
+        const remaining = maxLength - currentLength;
+
+        // Find or create counter element
+        let counter = document.getElementById('bio-counter');
+        if (!counter) {
+            counter = document.createElement('div');
+            counter.id = 'bio-counter';
+            counter.className = 'form-text';
+            this.parentNode.appendChild(counter);
+        }
+
+        counter.textContent = `${remaining} characters remaining`;
+        counter.className = remaining < 0 ? 'form-text text-danger' : 'form-text text-muted';
+
+        // Prevent further input if limit exceeded
+        if (remaining < 0) {
+            this.value = this.value.substring(0, maxLength);
+        }
+    });
 </script>
 </body>
 </html>
