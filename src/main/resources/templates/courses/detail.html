@@ -8,359 +8,462 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/dashboard">
-                <i class="fas fa-graduation-cap me-2"></i>Sportal
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav" aria-controls="navbarNav"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">
-                            <i class="fas fa-home me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/courses">
-                            <i class="fas fa-book me-1"></i>Courses
-                        </a>
-                    </li>
-                    <li class="nav-item" th:if="${user.role.name() == 'INSTRUCTOR'}">
-                        <a class="nav-link" href="/courses/create">
-                            <i class="fas fa-plus me-1"></i>Create Course
-                        </a>
-                    </li>
-                    <li class="nav-item" th:if="${user.role.name() == 'STUDENT'}">
-                        <a class="nav-link" href="/enrollments">
-                            <i class="fas fa-user-graduate me-1"></i>My Enrollments
-                        </a>
-                    </li>
-
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user me-1"></i>
-                            <span th:text="${user.name}">User</span>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="/profile">
-                                <i class="fas fa-user-cog me-2"></i>Profile
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">
+            <i class="fas fa-graduation-cap me-2"></i>Sportal
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-home me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/courses">
+                        <i class="fas fa-book me-1"></i>Courses
+                    </a>
+                </li>
+                <li class="nav-item" th:if="${user.role.name() == 'INSTRUCTOR'}">
+                    <a class="nav-link" href="/courses/create">
+                        <i class="fas fa-plus me-1"></i>Create Course
+                    </a>
+                </li>
+                <li class="nav-item" th:if="${user.role.name() == 'STUDENT'}">
+                    <a class="nav-link" href="/enrollments">
+                        <i class="fas fa-user-graduate me-1"></i>My Enrollments
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${user.name}">User</span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">
+                            <i class="fas fa-user-cog me-2"></i>Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <!-- Main Content -->
-    <div class="container mt-4">
-        <!-- Course Header -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                                                 <div class="d-flex align-items-center mb-2">
-                                     <h2 class="mb-0" th:text="${course.title}">Course Title</h2>
-                                     <span class="badge ms-3" 
-                                           th:classappend="${course.visibility.name() == 'PUBLIC' ? 'bg-success' : 'bg-warning'}"
-                                           th:text="${course.visibility}">PUBLIC</span>
-                                 </div>
-                                                                 <p class="text-muted mb-3" th:text="${course.description}">Course description</p>
-                                <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <span class="badge bg-primary" th:text="${course.code}">CS101</span>
-                                    <span class="badge bg-secondary" th:text="${course.semester}">Fall 2024</span>
-                                    <span class="badge bg-info" th:text="${course.enrolledStudents + '/' + course.capacity}">25/30</span>
-                                </div>
-                                <div class="d-flex align-items-center text-muted">
-                                    <i class="fas fa-user me-2"></i>
-                                    <span th:text="${course.instructorName}">Instructor Name</span>
-                                    <span class="mx-2">•</span>
-                                    <i class="fas fa-calendar me-2"></i>
-                                    <span th:text="${#temporals.format(course.createdAt, 'MMM dd, yyyy')}">Jan 15, 2024</span>
-                                </div>
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Course Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-2">
+                                <h2 class="mb-0" th:text="${course.title}">Course Title</h2>
+                                <span class="badge ms-3"
+                                      th:classappend="${course.visibility.name() == 'PUBLIC' ? 'bg-success' : 'bg-warning'}"
+                                      th:text="${course.visibility}">PUBLIC</span>
                             </div>
-                            <div class="col-md-4 text-end">
-                                                                 <div th:if="${user.role.name() == 'STUDENT'}">
-                                     <button th:if="${!isEnrolled}" 
-                                             th:onclick="'enrollInCourse(' + ${course.id} + ')'" 
-                                             class="btn btn-success btn-lg mb-2">
-                                         <i class="fas fa-plus me-1"></i>Enroll Now
-                                     </button>
-                                     <span th:if="${isEnrolled}" class="badge bg-success fs-6 mb-2 d-block">
-                                         <i class="fas fa-check me-1"></i>Enrolled
-                                     </span>
-                                 </div>
-                                 <div th:if="${user.role.name() == 'INSTRUCTOR'}">
-                                     <a th:href="@{/courses/{id}/edit(id=${course.id})}" class="btn btn-warning btn-lg mb-2">
-                                         <i class="fas fa-edit me-1"></i>Edit Course
-                                     </a>
-                                     <button th:onclick="'deleteCourse(' + ${course.id} + ')'" class="btn btn-danger btn-lg">
-                                         <i class="fas fa-trash me-1"></i>Delete Course
-                                     </button>
-                                 </div>
+                            <p class="text-muted mb-3" th:text="${course.description}">Course description</p>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge bg-primary" th:text="${course.code}">CS101</span>
+                                <span class="badge bg-secondary" th:text="${course.semester}">Fall 2024</span>
+                                <span class="badge bg-info" th:text="${course.enrolledStudents + '/' + course.capacity}">25/30</span>
+                            </div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="fas fa-user me-2"></i>
+                                <span th:text="${course.instructorName}">Instructor Name</span>
+                                <span class="mx-2">•</span>
+                                <i class="fas fa-calendar me-2"></i>
+                                <span th:text="${#temporals.format(course.createdAt, 'MMM dd, yyyy')}">Jan 15, 2024</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div th:if="${user.role.name() == 'STUDENT'}">
+                                <button th:if="${!isEnrolled}"
+                                        th:onclick="'enrollInCourse(' + ${course.id} + ')'"
+                                        class="btn btn-success btn-lg mb-2">
+                                    <i class="fas fa-plus me-1"></i>Enroll Now
+                                </button>
+                                <span th:if="${isEnrolled}" class="badge bg-success fs-6 mb-2 d-block">
+                                        <i class="fas fa-check me-1"></i>Enrolled
+                                    </span>
+                            </div>
+                            <div th:if="${user.role.name() == 'INSTRUCTOR'}">
+                                <a th:href="@{/courses/{id}/edit(id=${course.id})}" class="btn btn-warning btn-lg mb-2">
+                                    <i class="fas fa-edit me-1"></i>Edit Course
+                                </a>
+                                <button th:onclick="'deleteCourse(' + ${course.id} + ')'" class="btn btn-danger btn-lg">
+                                    <i class="fas fa-trash me-1"></i>Delete Course
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Course Content Tabs -->
-<!--        <div class="row">-->
-<!--            <div class="col-12">-->
-<!--                <div class="card border-0 shadow-sm">-->
-<!--                    <div class="card-header bg-white border-0">-->
-<!--                        <ul class="nav nav-tabs card-header-tabs" id="courseTabs" role="tablist">-->
-<!--                            <li class="nav-item" role="presentation">-->
-<!--                                <button class="nav-link active" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab">-->
-<!--                                    <i class="fas fa-file-alt me-1"></i>Materials-->
-<!--                                </button>-->
-<!--                            </li>-->
-<!--                            <li class="nav-item" role="presentation" th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">-->
-<!--                                <button class="nav-link" id="enrollments-tab" data-bs-toggle="tab" data-bs-target="#enrollments" type="button" role="tab">-->
-<!--                                    <i class="fas fa-users me-1"></i>Enrollments-->
-<!--                                </button>-->
-<!--                            </li>-->
-<!--                            <li class="nav-item" role="presentation">-->
-<!--                                <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">-->
-<!--                                    <i class="fas fa-info-circle me-1"></i>Course Info-->
-<!--                                </button>-->
-<!--                            </li>-->
-<!--                        </ul>-->
-<!--                    </div>-->
-<!--                    <div class="card-body">-->
-<!--                        <div class="tab-content" id="courseTabsContent">-->
-<!--                            &lt;!&ndash; Materials Tab &ndash;&gt;-->
-<!--                            <div class="tab-pane fade show active" id="materials" role="tabpanel">-->
-<!--                                <div class="d-flex justify-content-between align-items-center mb-3">-->
-<!--                                    <h5 class="mb-0">Course Materials</h5>-->
-<!--                                    <button th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}" -->
-<!--                                            class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">-->
-<!--                                        <i class="fas fa-upload me-1"></i>Upload Material-->
-<!--                                    </button>-->
-<!--                                </div>-->
-<!--                                -->
-<!--                                <div th:if="${materials and !materials.empty and materials != null}">-->
-<!--                                    <div class="row">-->
-<!--                                        <div class="col-md-6 col-lg-4 mb-3" th:each="material : ${materials}">-->
-<!--                                            <div class="card h-100 border-0 shadow-sm">-->
-<!--                                                <div class="card-body">-->
-<!--                                                    <div class="d-flex justify-content-between align-items-start mb-2">-->
-<!--                                                        <h6 class="card-title mb-0" th:text="${material.title}">Material Title</h6>-->
-<!--                                                        <span class="badge" -->
-<!--                                                              th:classappend="${material.visibility == 'PUBLIC' ? 'bg-success' : 'bg-warning'}"-->
-<!--                                                              th:text="${material.visibility}">PUBLIC</span>-->
-<!--                                                    </div>-->
-<!--                                                    <p class="card-text text-muted small" th:text="${material.description}">Description</p>-->
-<!--                                                    <div class="mb-2">-->
-<!--                                                        <small class="text-muted">-->
-<!--                                                            <i class="fas fa-file me-1"></i>-->
-<!--                                                            <span th:text="${material.fileName}">filename.pdf</span>-->
-<!--                                                        </small>-->
-<!--                                                    </div>-->
-<!--                                                    <div class="d-flex justify-content-between align-items-center">-->
-<!--                                                        <small class="text-muted">-->
-<!--                                                            <i class="fas fa-calendar me-1"></i>-->
-<!--                                                            <span th:text="${#temporals.format(material.uploadedAt, 'MMM dd')}">Jan 15</span>-->
-<!--                                                        </small>-->
-<!--                                                        <small class="text-muted" th:if="${material.fileSize}">-->
-<!--                                                            <span th:text="${#numbers.formatDecimal(material.fileSize / 1024, 1, 1)} + ' KB'">1.2 KB</span>-->
-<!--                                                        </small>-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                                <div class="card-footer bg-white border-0">-->
-<!--                                                    <div class="d-flex justify-content-between">-->
-<!--                                                        <a th:href="@{/materials/{id}/download(id=${material.id})}" class="btn btn-outline-primary btn-sm">-->
-<!--                                                            <i class="fas fa-download me-1"></i>Download-->
-<!--                                                        </a>-->
-<!--                                                        <div th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">-->
-<!--                                                            <button th:onclick="'deleteMaterial(' + ${material.id} + ')'" class="btn btn-outline-danger btn-sm">-->
-<!--                                                                <i class="fas fa-trash me-1"></i>Delete-->
-<!--                                                            </button>-->
-<!--                                                        </div>-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                                -->
-<!--                                <div class="text-center py-4" th:if="${!materials or materials.empty}">-->
-<!--                                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>-->
-<!--                                    <h6 class="text-muted mb-2">No materials uploaded yet</h6>-->
-<!--                                    <p class="text-muted small">Course materials will appear here once uploaded by the instructor.</p>-->
-<!--                                </div>-->
-<!--                            </div>-->
+    <!-- Course Content Tabs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <ul class="nav nav-tabs card-header-tabs" id="courseTabs" role="tablist">
+                        <li class="nav-item" role="presentation"
+                            th:if="${user.role.name() == 'INSTRUCTOR' or (user.role.name() == 'STUDENT' and isEnrolled)}">
+                            <button class="nav-link active" id="assignments-tab" data-bs-toggle="tab" data-bs-target="#assignments" type="button" role="tab">
+                                <i class="fas fa-tasks me-1"></i>Assignments
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab">
+                                <i class="fas fa-file-alt me-1"></i>Materials
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation" th:if="${user.role.name() == 'INSTRUCTOR' and course.instructorId == user.id}">
+                            <button class="nav-link" id="enrollments-tab" data-bs-toggle="tab" data-bs-target="#enrollments" type="button" role="tab">
+                                <i class="fas fa-users me-1"></i>Enrollments
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                                <i class="fas fa-info-circle me-1"></i>Course Info
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="courseTabsContent">
+                        <!-- Assignments Tab -->
+                        <div class="tab-pane fade show active" id="assignments" role="tabpanel"
+                             th:if="${user.role.name() == 'INSTRUCTOR' or (user.role.name() == 'STUDENT' and isEnrolled)}">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Course Assignments</h5>
+                                <button th:if="${user.role.name() == 'INSTRUCTOR' and course.instructorId == user.id}"
+                                        class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createAssignmentModal">
+                                    <i class="fas fa-plus me-1"></i>Create Assignment
+                                </button>
+                            </div>
 
-<!--                            &lt;!&ndash; Enrollments Tab &ndash;&gt;-->
-<!--                            <div class="tab-pane fade" id="enrollments" role="tabpanel" th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">-->
-<!--                                <h5 class="mb-3">Student Enrollments</h5>-->
-<!--                                <div th:if="${enrollments and !enrollments.empty}">-->
-<!--                                    <div class="table-responsive">-->
-<!--                                        <table class="table table-hover">-->
-<!--                                            <thead>-->
-<!--                                                <tr>-->
-<!--                                                    <th>Student</th>-->
-<!--                                                    <th>Email</th>-->
-<!--                                                    <th>Status</th>-->
-<!--                                                    <th>Enrolled Date</th>-->
-<!--                                                </tr>-->
-<!--                                            </thead>-->
-<!--                                            <tbody>-->
-<!--                                                <tr th:each="enrollment : ${enrollments}">-->
-<!--                                                    <td th:text="${enrollment.student.name}">Student Name</td>-->
-<!--                                                    <td th:text="${enrollment.student.email}">student@email.com</td>-->
-<!--                                                    <td>-->
-<!--                                                        <span class="badge" -->
-<!--                                                              th:classappend="${enrollment.status == 'ENROLLED' ? 'bg-success' : (enrollment.status == 'PENDING' ? 'bg-warning' : 'bg-danger')}"-->
-<!--                                                              th:text="${enrollment.status}">ENROLLED</span>-->
-<!--                                                    </td>-->
-<!--                                                    <td th:text="${#temporals.format(enrollment.enrolledAt, 'MMM dd, yyyy')}">Jan 15, 2024</td>-->
-<!--                                                    <td>-->
-<!--                                                        <span class="badge" -->
-<!--                                                              th:classappend="${enrollment.status == 'ENROLLED' ? 'bg-success' : (enrollment.status == 'PENDING' ? 'bg-warning' : 'bg-danger')}"-->
-<!--                                                              th:text="${enrollment.status}">ENROLLED</span>-->
-<!--                                                    </td>-->
-<!--                                                </tr>-->
-<!--                                            </tbody>-->
-<!--                                        </table>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                                <div class="text-center py-4" th:if="${!enrollments or enrollments.empty}">-->
-<!--                                    <i class="fas fa-users fa-3x text-muted mb-3"></i>-->
-<!--                                    <h6 class="text-muted mb-2">No enrollments yet</h6>-->
-<!--                                    <p class="text-muted small">Students will appear here once they enroll in your course.</p>-->
-<!--                                </div>-->
-<!--                            </div>-->
-
-                            <!-- Course Info Tab -->
-                            <div class="tab-pane fade" id="info" role="tabpanel">
-                                <h5 class="mb-3">Course Information</h5>
+                            <div th:if="${assignments != null and assignments.hasContent()}">
                                 <div class="row">
-                                    <div class="col-md-6">
-                                        <table class="table table-borderless">
-                                            <tr>
-                                                <td><strong>Course Code:</strong></td>
-                                                <td th:text="${course.code}">CS101</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Title:</strong></td>
-                                                <td th:text="${course.title}">Course Title</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Instructor:</strong></td>
-                                                <td th:text="${course.instructorName}">Instructor Name</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Semester:</strong></td>
-                                                <td th:text="${course.semester}">Fall 2024</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <table class="table table-borderless">
-                                            <tr>
-                                                <td><strong>Capacity:</strong></td>
-                                                <td th:text="${course.capacity}">30</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Enrolled:</strong></td>
-                                                <td th:text="${course.enrolledStudents}">25</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Available:</strong></td>
-                                                <td th:text="${course.capacity - course.enrolledStudents}">5</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Created:</strong></td>
-                                                <td th:text="${#temporals.format(course.createdAt, 'MMM dd, yyyy')}">Jan 15, 2024</td>
-                                            </tr>
-                                        </table>
+                                    <div class="col-12 mb-3" th:each="assignment : ${assignments.content}">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-8">
+                                                        <div class="d-flex align-items-start justify-content-between mb-2">
+                                                            <h6 class="card-title mb-0" th:text="${assignment.title}">Assignment Title</h6>
+                                                            <span class="badge bg-info ms-2" th:if="${assignment.maxScore}"
+                                                                  th:text="${assignment.maxScore + ' pts'}">100 pts</span>
+                                                        </div>
+                                                        <p class="card-text text-muted mb-2" th:text="${assignment.description}">Assignment description</p>
+                                                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                                <strong>Due:</strong>
+                                                                <span th:text="${assignment.dueDate != null ? #temporals.format(assignment.dueDate, 'MMM dd, yyyy HH:mm') : 'No due date'}">Dec 15, 2024 23:59</span>
+                                                            </small>
+                                                            <span th:if="${assignment.dueDate != null and assignment.dueDate.isBefore(T(java.time.LocalDateTime).now())}"
+                                                                  class="badge bg-danger">Overdue</span>
+                                                            <span th:if="${assignment.dueDate != null and assignment.dueDate.isAfter(T(java.time.LocalDateTime).now()) and assignment.dueDate.isBefore(T(java.time.LocalDateTime).now().plusDays(3))}"
+                                                                  class="badge bg-warning">Due Soon</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 text-end">
+                                                        <!-- Student View -->
+                                                        <div th:if="${user.role.name() == 'STUDENT' and isEnrolled}">
+                                                            <!-- Check if student has submitted -->
+                                                            <div th:if="${assignment.submissions != null and assignment.submissions.size() > 0}">
+                                                                <button class="btn btn-success btn-sm mb-2" disabled>
+                                                                    <i class="fas fa-check me-1"></i>Submitted
+                                                                </button>
+                                                                <div class="text-muted small">
+                                                                    <i class="fas fa-clock me-1"></i>
+                                                                    Submitted on: <span th:text="${#temporals.format(assignment.submissions[0].submittedAt, 'MMM dd, yyyy HH:mm')}">Dec 10, 2024 15:30</span>
+                                                                </div>
+                                                            </div>
+                                                            <div th:if="${assignment.submissions == null or assignment.submissions.size() == 0}">
+                                                                    <a th:if="${assignment.dueDate == null or assignment.dueDate.isAfter(T(java.time.LocalDateTime).now())}"
+                                                                       th:href="@{/submission/{id}/submit(id=${assignment.id})}"
+                                                                       class="btn btn-primary btn-sm">
+                                                                        <i class="fas fa-upload me-1"></i>Submit Assignment
+                                                                    </a>
+                                                                <button th:if="${assignment.dueDate != null and assignment.dueDate.isBefore(T(java.time.LocalDateTime).now())}"
+                                                                        class="btn btn-secondary btn-sm" disabled>
+                                                                    <i class="fas fa-times me-1"></i>Past Due
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Instructor View -->
+                                                        <div th:if="${user.role.name() == 'INSTRUCTOR' and course.instructorId == user.id}">
+                                                            <div class="d-flex flex-column gap-2">
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-users me-1"></i>
+                                                                    <span th:text="${assignment.submissions != null ? assignment.submissions.size() : 0}">0</span> submissions
+                                                                </small>
+                                                                <div class="btn-group btn-group-sm">
+                                                                    <a th:href="@{/assignments/{id}/edit(id=${assignment.id})}" class="btn btn-outline-warning">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </a>
+                                                                    <a th:href="@{/assignments/{id}/submissions(id=${assignment.id})}" class="btn btn-outline-info">
+                                                                        <i class="fas fa-eye"></i>
+                                                                    </a>
+                                                                    <button th:onclick="'deleteAssignment(' + ${assignment.id} + ')'" class="btn btn-outline-danger">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="mt-3">
-                                    <h6>Description:</h6>
-                                    <p class="text-muted" th:text="${course.description}">Course description</p>
-                                </div>
+                            </div>
+
+                            <!-- Pagination for Assignments -->
+                            <div th:if="${assignments.totalPages > 1}" class="d-flex justify-content-center mt-4">
+                                <nav aria-label="Assignments pagination">
+                                    <ul class="pagination">
+                                        <li class="page-item" th:classappend="${assignments.first} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/courses/{id}(id=${course.id}, page=${assignments.number - 1})}" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+
+                                        <li th:each="i : ${#numbers.sequence(0, assignments.totalPages - 1)}"
+                                            class="page-item"
+                                            th:classappend="${i == assignments.number} ? 'active'">
+                                            <a class="page-link" th:href="@{/courses/{id}(id=${course.id}, page=${i})}" th:text="${i + 1}">1</a>
+                                        </li>
+
+                                        <li class="page-item" th:classappend="${assignments.last} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/courses/{id}(id=${course.id}, page=${assignments.number + 1})}" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+
+                        <div class="text-center py-4" th:if="${assignments == null or !assignments.hasContent()}">
+                            <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted mb-2">No assignments yet</h6>
+                            <p class="text-muted small" th:if="${user.role.name() == 'STUDENT'}">Assignments will appear here once created by the instructor.</p>
+                            <p class="text-muted small" th:if="${user.role.name() == 'INSTRUCTOR'}">Start by creating your first assignment for this course.</p>
+                        </div>
+                    </div>
+
+                    <!-- Course Info Tab -->
+                    <div class="tab-pane fade" id="info" role="tabpanel">
+                        <h5 class="mb-3">Course Information</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Course Code:</strong></td>
+                                        <td th:text="${course.code}">CS101</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Title:</strong></td>
+                                        <td th:text="${course.title}">Course Title</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Instructor:</strong></td>
+                                        <td th:text="${course.instructorName}">Instructor Name</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Semester:</strong></td>
+                                        <td th:text="${course.semester}">Fall 2024</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Capacity:</strong></td>
+                                        <td th:text="${course.capacity}">30</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Enrolled:</strong></td>
+                                        <td th:text="${course.enrolledStudents}">25</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Available:</strong></td>
+                                        <td th:text="${course.capacity - course.enrolledStudents}">5</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Created:</strong></td>
+                                        <td th:text="${#temporals.format(course.createdAt, 'MMM dd, yyyy')}">Jan 15, 2024</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <h6>Description:</h6>
+                            <p class="text-muted" th:text="${course.description}">Course description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Upload Material Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Upload Material</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/materials/upload}" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Material Title *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file" class="form-label">File *</label>
+                        <input type="file" class="form-control" id="file" name="file" required>
+                        <div class="form-text">Supported formats: PDF, DOC, DOCX, PPT, PPTX, JPG, PNG (Max: 10MB)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="visibility" class="form-label">Visibility *</label>
+                        <select class="form-select" id="visibility" name="visibility" required>
+                            <option value="">Select Visibility</option>
+                            <option value="PUBLIC">Public - Visible to everyone</option>
+                            <option value="ENROLLED">Enrolled Only - Only enrolled students can access</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="courseId" th:value="${course.id}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload Material</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create Assignment Modal -->
+<div class="modal fade" id="createAssignmentModal" tabindex="-1" aria-labelledby="createAssignmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createAssignmentModalLabel">Create Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/assignments/create}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="assignmentTitle" class="form-label">Assignment Title *</label>
+                        <input type="text" class="form-control" id="assignmentTitle" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="assignmentDescription" class="form-label">Description *</label>
+                        <textarea class="form-control" id="assignmentDescription" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="dueDate" class="form-label">Due Date</label>
+                                <input type="datetime-local" class="form-control" id="dueDate" name="dueDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="maxScore" class="form-label">Max Score</label>
+                                <input type="number" class="form-control" id="maxScore" name="maxScore" min="0" step="0.01" placeholder="100">
                             </div>
                         </div>
                     </div>
+                    <input type="hidden" name="courseId" th:value="${course.id}">
                 </div>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Assignment</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- Upload Material Modal -->
-    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="uploadModalLabel">Upload Material</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form th:action="@{/materials/upload}" method="post" enctype="multipart/form-data">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Material Title *</label>
-                            <input type="text" class="form-control" id="title" name="title" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="file" class="form-label">File *</label>
-                            <input type="file" class="form-control" id="file" name="file" required>
-                            <div class="form-text">Supported formats: PDF, DOC, DOCX, PPT, PPTX, JPG, PNG (Max: 10MB)</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="visibility" class="form-label">Visibility *</label>
-                            <select class="form-select" id="visibility" name="visibility" required>
-                                <option value="">Select Visibility</option>
-                                <option value="PUBLIC">Public - Visible to everyone</option>
-                                <option value="ENROLLED">Enrolled Only - Only enrolled students can access</option>
-                            </select>
-                        </div>
-                        <input type="hidden" name="courseId" th:value="${course.id}">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Upload Material</button>
-                    </div>
-                </form>
+<!-- Submit Assignment Modal -->
+<div class="modal fade" id="submitAssignmentModal" tabindex="-1" aria-labelledby="submitAssignmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="submitAssignmentModalLabel">Submit Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <form id="submitAssignmentForm" action="/submissions/submit" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6 id="assignmentTitleDisplay">Assignment Title</h6>
+                        <p class="text-muted small">Submit your work for this assignment below.</p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="submissionFile" class="form-label">Upload File *</label>
+                        <input type="file" class="form-control" id="submissionFile" name="file" required>
+                        <div class="form-text">Supported formats: PDF, DOC, DOCX, TXT, ZIP (Max: 10MB)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="submissionComments" class="form-label">Comments (Optional)</label>
+                        <textarea class="form-control" id="submissionComments" name="comments" rows="3" placeholder="Add any comments about your submission..."></textarea>
+                    </div>
+                    <input type="hidden" id="assignmentIdInput" name="assignmentId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- Footer -->
-    <footer class="text-center mt-5 py-4 bg-light border-top">
-        <p class="mb-0">&copy; Sportal - Student Portal System. All rights reserved.</p>
-    </footer>
+<!-- Footer -->
+<footer class="text-center mt-5 py-4 bg-light border-top">
+    <p class="mb-0">&copy; Sportal - Student Portal System. All rights reserved.</p>
+</footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <script>
-        function enrollInCourse(courseId) {
-            if (confirm('Are you sure you want to enroll in this course?')) {
-                fetch(`/enrollments/enroll/${courseId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script>
+    function enrollInCourse(courseId) {
+        if (confirm('Are you sure you want to enroll in this course?')) {
+            fetch(`/enrollments/enroll/${courseId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
                 .then(response => {
                     if (response.ok) {
                         location.reload();
@@ -372,17 +475,17 @@
                     console.error('Error:', error);
                     alert('An error occurred. Please try again.');
                 });
-            }
         }
+    }
 
-        function deleteCourse(courseId) {
-            if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
-                fetch(`/courses/${courseId}/delete`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
+    function deleteCourse(courseId) {
+        if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+            fetch(`/courses/${courseId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
                 .then(response => {
                     if (response.ok) {
                         window.location.href = '/courses';
@@ -394,17 +497,17 @@
                     console.error('Error:', error);
                     alert('An error occurred. Please try again.');
                 });
-            }
         }
+    }
 
-        function deleteMaterial(materialId) {
-            if (confirm('Are you sure you want to delete this material? This action cannot be undone.')) {
-                fetch(`/materials/${materialId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
+    function deleteMaterial(materialId) {
+        if (confirm('Are you sure you want to delete this material? This action cannot be undone.')) {
+            fetch(`/materials/${materialId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
                 .then(response => {
                     if (response.ok) {
                         location.reload();
@@ -416,8 +519,61 @@
                     console.error('Error:', error);
                     alert('An error occurred. Please try again.');
                 });
-            }
         }
-    </script>
+    }
+
+    function deleteAssignment(assignmentId) {
+        if (confirm('Are you sure you want to delete this assignment? This action cannot be undone and will delete all submissions.')) {
+            fetch(`/assignments/${assignmentId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to delete assignment. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
+    }
+
+    function showSubmissionModal(assignmentId, assignmentTitle) {
+        document.getElementById('assignmentIdInput').value = assignmentId;
+        document.getElementById('assignmentTitleDisplay').textContent = assignmentTitle;
+
+        const modal = new bootstrap.Modal(document.getElementById('submitAssignmentModal'));
+        modal.show();
+    }
+
+    // Handle submission form
+    document.getElementById('submitAssignmentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/submissions/submit', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Failed to submit assignment. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+    });
+</script>
 </body>
 </html>

@@ -3,13 +3,19 @@ package com.example.Sportal.controller;
 import com.example.Sportal.models.dto.course.CourseDto;
 import com.example.Sportal.models.dto.course.CreateCourseRequest;
 import com.example.Sportal.models.dto.course.UpdateCourseRequest;
+import com.example.Sportal.models.entities.Assignment;
 import com.example.Sportal.models.entities.Course;
 import com.example.Sportal.models.entities.User;
 import com.example.Sportal.repository.CourseRepository;
 import com.example.Sportal.security.CustomUserDetails;
+import com.example.Sportal.service.AssignmentsService;
 import com.example.Sportal.service.CoursesService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -31,6 +37,9 @@ public class CoursesController {
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private AssignmentsService assignmentsService;
 
     @GetMapping
     @Transactional
@@ -142,7 +151,8 @@ public class CoursesController {
 
     @GetMapping("/{id}")
     @Transactional
-    public String viewCourse(@PathVariable Long id, Model model) {
+    public String viewCourse(@PathVariable Long id, Model model,@RequestParam(defaultValue = "0") int page,
+                             @RequestParam(defaultValue = "10") int size) {
         try {
             User currentUser = getCurrentUser();
             if (currentUser == null) {
@@ -173,6 +183,10 @@ public class CoursesController {
                 boolean isEnrolled = coursesService.isStudentEnrolledInCourse(currentUser, id);
                 model.addAttribute("isEnrolled", isEnrolled);
             }
+
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<Assignment> assignments = assignmentsService.getAssignmentsByCourse(id,pageable);
+            model.addAttribute("assignments", assignments);
 
             return "courses/detail";
         } catch (Exception e) {

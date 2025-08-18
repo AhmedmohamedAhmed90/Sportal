@@ -12,11 +12,11 @@ public interface AssignmentsService {
     Assignment createAssignment(Assignment assignment);
 
     Page<Assignment> getAllAssignments(Pageable pageable);
+
     Page<Assignment> searchAssignments(String searchTerm, Pageable pageable);
     Page<Assignment> getAssignmentsByCourse(Long courseId, Pageable pageable);
 
     Optional<Assignment> getAssignmentById(Long id);
-
     Assignment updateAssignment(Assignment assignment);
 
     void deleteAllAssignmentsByCourseId(Long courseId);
