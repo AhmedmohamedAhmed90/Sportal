@@ -179,7 +179,7 @@ public class AdminController {
                 model.addAttribute("course", courseService.getCourseById(id));
                 model.addAttribute("instructors", usersService.getUsersByRole(User.Role.INSTRUCTOR));
                 model.addAttribute("isEdit", true);
-                return "admin/course-form";
+                return "admin/courses-form";
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("error", "Course not found");
             }
@@ -191,7 +191,6 @@ public class AdminController {
     public String saveCourse(@ModelAttribute CourseDto courseDto, RedirectAttributes redirectAttributes) {
         try {
             if (courseService != null) {
-                // Implementation depends on your CourseService methods
                 redirectAttributes.addFlashAttribute("success", "Course saved successfully");
             }
         } catch (Exception e) {
@@ -204,7 +203,6 @@ public class AdminController {
     public String deleteCourse(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             if (courseService != null) {
-                // Implementation depends on your CourseService methods
                 redirectAttributes.addFlashAttribute("success", "Course deleted successfully");
             }
         } catch (Exception e) {
@@ -216,7 +214,6 @@ public class AdminController {
     @GetMapping("/enrollments")
     public String adminEnrollments(Model model) {
         if (enrollmentService != null) {
-            // Add enrollment data to model
             model.addAttribute("enrollments", 0);
         }
         return "admin/enrollments";

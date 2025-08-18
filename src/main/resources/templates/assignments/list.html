@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments Management - Sportal Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/admin/dashboard">
+            <i class="fas fa-graduation-cap me-2"></i>Sportal Admin
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/dashboard">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/users">
+                        <i class="fas fa-users me-1"></i>Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/courses">
+                        <i class="fas fa-book me-1"></i>Courses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/assignments">
+                        <i class="fas fa-tasks me-1"></i>Assignments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/enrollments">
+                        <i class="fas fa-user-check me-1"></i>Enrollments
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-shield me-1"></i>
+                        <span th:text="${session.user != null ? session.user.name : 'Admin'}">Admin</span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/admin/profile">
+                            <i class="fas fa-user-cog me-2"></i>Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1"><i class="fas fa-tasks me-2 text-primary"></i>Assignments Management</h2>
+                            <p class="text-muted mb-0">Manage course assignments and submissions</p>
+                        </div>
+                        <a href="/assignments/create" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Add New Assignment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mt-4" th:if="${assignments != null and !assignments.isEmpty()}">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-clipboard-list fa-2x text-primary mb-2"></i>
+                    <h5 class="card-title" th:text="${totalAssignments ?: #lists.size(assignments)}">25</h5>
+                    <p class="card-text text-muted">Total Assignments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                    <h5 class="card-title" th:text="${overdueAssignments ?: 0}">3</h5>
+                    <p class="card-text text-muted">Overdue Assignments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-alt fa-2x text-info mb-2"></i>
+                    <h5 class="card-title" th:text="${totalSubmissions ?: 0}">127</h5>
+                    <p class="card-text text-muted">Total Submissions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="GET" action="/assignments" class="row g-3">
+                        <div class="col-md-5">
+                            <label for="search" class="form-label">Search Assignments</label>
+                            <input type="text" class="form-control" id="search" name="search"
+                                   placeholder="Search by title or description..." th:value="${searchQuery}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="courseId" class="form-label">Filter by Course</label>
+                            <select class="form-select" id="courseId" name="courseId">
+                                <option value="">All Courses</option>
+                                <option th:each="courseOption : ${courses}"
+                                        th:value="${courseOption.id}"
+                                        th:text="${courseOption.title}"
+                                        th:selected="${selectedCourseId == courseOption.id}">Course</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Status</option>
+                                <option value="upcoming" th:selected="${selectedStatus == 'upcoming'}">Upcoming</option>
+                                <option value="active" th:selected="${selectedStatus == 'active'}">Active</option>
+                                <option value="overdue" th:selected="${selectedStatus == 'overdue'}">Overdue</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-search me-1"></i>Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignments Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2 text-primary"></i>Assignments List
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" th:if="${assignments != null and !assignments.isEmpty()}">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Title</th>
+                                <th scope="col">Course</th>
+                                <th scope="col">Due Date</th>
+                                <th scope="col">Max Score</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Submissions</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="assignment : ${assignments}">
+                                <td th:text="${assignment.id}">#001</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px;">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" th:text="${assignment.title}">Assignment Title</h6>
+                                            <small class="text-muted" th:text="'Created ' + ${#temporals.format(assignment.createdAt, 'MMM dd, yyyy')}">Created Jan 15, 2024</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${assignment.course.title}">Course Name</span>
+                                </td>
+                                <td>
+                                    <div th:if="${assignment.dueDate != null}">
+                                        <span th:text="${#temporals.format(assignment.dueDate, 'MMM dd, yyyy HH:mm')}">Jan 30, 2024 23:59</span>
+                                        <br>
+                                        <small class="text-muted" th:text="${assignment.dueDate.isBefore(T(java.time.LocalDateTime).now()) ? 'Overdue' : 'Due in ' + T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDateTime).now(), assignment.dueDate) + ' days'}">Due in 5 days</small>
+                                    </div>
+                                    <span class="text-muted" th:if="${assignment.dueDate == null}">No due date</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold" th:text="${assignment.maxScore != null ? assignment.maxScore + ' pts' : 'No limit'}">100 pts</span>
+                                </td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${assignment.dueDate == null} ? 'bg-secondary' :
+                                                         (${assignment.dueDate.isBefore(T(java.time.LocalDateTime).now())} ? 'bg-danger' :
+                                                         (${assignment.dueDate.isAfter(T(java.time.LocalDateTime).now().plusDays(7))} ? 'bg-info' : 'bg-success'))"
+                                          th:text="${assignment.dueDate == null} ? 'No Due Date' :
+                                                   (${assignment.dueDate.isBefore(T(java.time.LocalDateTime).now())} ? 'Overdue' :
+                                                   (${assignment.dueDate.isAfter(T(java.time.LocalDateTime).now().plusDays(7))} ? 'Upcoming' : 'Active'))">Active</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file-alt me-1 text-muted"></i>
+                                        <span th:text="${assignment.submissions != null ? #lists.size(assignment.submissions) : 0}">5</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a th:href="@{/assignments/view/{id}(id=${assignment.id})}" class="btn btn-sm btn-outline-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a th:href="@{/assignments/edit/{id}(id=${assignment.id})}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                                                data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${assignment.id}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="text-center py-5" th:if="${assignments == null or assignments.isEmpty()}">
+                        <i class="fas fa-tasks fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Assignments Found</h4>
+                        <p class="text-muted mb-4">Get started by creating your first assignment.</p>
+                        <a href="/assignments/create" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create First Assignment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${totalPages != null and totalPages > 1}" class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Assignments pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/assignments(page=${currentPage - 1})}">Previous</a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        class="page-item" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/assignments(page=${i})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/assignments(page=${currentPage + 1})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modals -->
+<div th:each="assignment : ${assignments}" th:id="'deleteModal' + ${assignment.id}" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete assignment <strong th:text="${assignment.title}">Assignment Title</strong>?</p>
+                <p class="text-danger"><small>This action cannot be undone and will delete all associated submissions.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form th:action="@{/assignments/delete/{id}(id=${assignment.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete Assignment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center mt-5 py-4 bg-light border-top">
+    <p class="mb-0">&copy; 2024 Sportal - Student Portal System. All rights reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+<script>
+    // Auto-refresh overdue status every minute
+    setInterval(function() {
+        // This would typically trigger a partial page refresh or AJAX call
+        // For now, just refresh the page if there are time-sensitive assignments
+        const hasTimeSensitive = document.querySelectorAll('.badge.bg-success, .badge.bg-warning').length > 0;
+        if (hasTimeSensitive) {
+            // Uncomment the line below if you want auto-refresh
+            // location.reload();
+        }
+    }, 60000); // 1 minute
+
+    // Tooltip initialization for action buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const tooltips = document.querySelectorAll('[title]');
+        tooltips.forEach(function(element) {
+            new bootstrap.Tooltip(element);
+        });
+    });
+</script>
+</body>
+</html>

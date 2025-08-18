@@ -31,7 +31,12 @@
                             <i class="fas fa-book me-1"></i>Courses
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" th:if="${user.role.name() == 'INSTRUCTOR'}">
+                        <a class="nav-link" href="/courses/create">
+                            <i class="fas fa-plus me-1"></i>Create Course
+                        </a>
+                    </li>
+                    <li class="nav-item" th:if="${user.role.name() == 'STUDENT'}">
                         <a class="nav-link active" href="/enrollments">
                             <i class="fas fa-user-graduate me-1"></i>My Enrollments
                         </a>
@@ -70,48 +75,140 @@
             </div>
         </div>
 
+        <!-- Enrollment Statistics -->
+        <div class="row mb-4" th:if="${enrollments and !enrollments.empty}">
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <h4 class="text-primary mb-1" th:text="${enrollments.size()}">5</h4>
+                        <small class="text-muted">Total Enrollments</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <h4 class="text-success mb-1" th:text="${enrollments.stream().filter(e -> e.status.name() == 'ENROLLED').count()}">4</h4>
+                        <small class="text-muted">Active Courses</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <h4 class="text-warning mb-1" th:text="${enrollments.stream().filter(e -> e.status.name() == 'PENDING').count()}">1</h4>
+                        <small class="text-muted">Pending Approval</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <h4 class="text-info mb-1" th:text="${#temporals.format(#temporals.createNow(), 'MMM yyyy')}">Dec 2024</h4>
+                        <small class="text-muted">Current Semester</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Enrollments List -->
         <div class="row" th:if="${enrollments and !enrollments.empty}">
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2 text-primary"></i>My Course Enrollments
+                            </h5>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm active" onclick="filterEnrollments('all')">
+                                    All
+                                </button>
+                                <button type="button" class="btn btn-outline-success btn-sm" onclick="filterEnrollments('enrolled')">
+                                    Active
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterEnrollments('pending')">
+                                    Pending
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover" id="enrollmentsTable">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>Course</th>
-                                        <th>Instructor</th>
-                                        <th>Status</th>
-                                        <th>Enrolled Date</th>
-                                        <th>Actions</th>
+                                        <th>
+                                            <i class="fas fa-book me-1"></i>Course
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-user me-1"></i>Instructor
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-info-circle me-1"></i>Status
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-calendar me-1"></i>Enrolled Date
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-cogs me-1"></i>Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="enrollment : ${enrollments}">
+                                    <tr th:each="enrollment : ${enrollments}" th:data-status="${enrollment.status.name().toLowerCase()}">
                                         <td>
-                                            <div>
-                                                <strong th:text="${enrollment.course.title}">Course Title</strong>
-                                                <br>
-                                                <small class="text-muted" th:text="${enrollment.course.code}">CS101</small>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <i class="fas fa-graduation-cap fa-2x text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <strong th:text="${enrollment.course.title}" class="d-block">Course Title</strong>
+                                                    <small class="text-muted" th:text="${enrollment.course.code}">CS101</small>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-users me-1"></i>
+                                                        <span th:text="${enrollment.course.enrolledStudents + '/' + enrollment.course.capacity}">25/30</span> students
+                                                    </small>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td th:text="${enrollment.course.instructor.name}">Instructor Name</td>
                                         <td>
-                                            <span class="badge" 
-                                                  th:classappend="${enrollment.status == 'ENROLLED' ? 'bg-success' : (enrollment.status == 'PENDING' ? 'bg-warning' : 'bg-danger')}"
-                                                  th:text="${enrollment.status}">ENROLLED</span>
+                                            <div>
+                                                <strong th:text="${enrollment.course.instructor.name}">Instructor Name</strong>
+                                                <br>
+                                                <small class="text-muted" th:text="${enrollment.course.instructor.email}">instructor@email.com</small>
+                                            </div>
                                         </td>
-                                        <td th:text="${#temporals.format(enrollment.enrolledAt, 'MMM dd, yyyy')}">Jan 15, 2024</td>
                                         <td>
-                                            <div class="btn-group" role="group">
-                                                <a th:href="@{/courses/{id}(id=${enrollment.course.id})}" class="btn btn-outline-primary btn-sm">
-                                                    <i class="fas fa-eye me-1"></i>View
+                                            <span class="badge fs-6" 
+                                                  th:classappend="${enrollment.status.name() == 'ENROLLED' ? 'bg-success' : (enrollment.status.name() == 'PENDING' ? 'bg-warning' : 'bg-danger')}"
+                                                  th:text="${enrollment.status}">ENROLLED</span>
+                                            <br>
+                                            <small class="text-muted" th:if="${enrollment.status.name() == 'PENDING'}">
+                                                Awaiting instructor approval
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <strong th:text="${#temporals.format(enrollment.enrolledAt, 'MMM dd, yyyy')}">Jan 15, 2024</strong>
+                                                <br>
+                                                <small class="text-muted" th:text="${#temporals.format(enrollment.enrolledAt, 'HH:mm')}">14:30</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group-vertical" role="group">
+                                                <a th:href="@{/courses/{id}(id=${enrollment.course.id})}" class="btn btn-outline-primary btn-sm mb-1">
+                                                    <i class="fas fa-eye me-1"></i>View Course
                                                 </a>
-                                                <button th:if="${enrollment.status == 'ENROLLED'}" 
+                                                <button th:if="${enrollment.status.name() == 'ENROLLED'}" 
                                                         th:onclick="'dropCourse(' + ${enrollment.course.id} + ')'" 
                                                         class="btn btn-outline-danger btn-sm">
-                                                    <i class="fas fa-times me-1"></i>Drop
+                                                    <i class="fas fa-times me-1"></i>Drop Course
                                                 </button>
+                                                <span th:if="${enrollment.status.name() == 'PENDING'}" class="badge bg-warning">
+                                                    <i class="fas fa-clock me-1"></i>Waiting
+                                                </span>
                                             </div>
                                         </td>
                                     </tr>
@@ -144,7 +241,7 @@
         function dropCourse(courseId) {
             if (confirm('Are you sure you want to drop this course? This action cannot be undone.')) {
                 fetch(`/enrollments/drop/${courseId}`, {
-                    method: 'DELETE',
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     }
@@ -162,6 +259,57 @@
                 });
             }
         }
+
+        function filterEnrollments(status) {
+            const table = document.getElementById('enrollmentsTable');
+            const rows = table.querySelectorAll('tbody tr');
+            const filterButtons = document.querySelectorAll('.btn-group .btn');
+
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            rows.forEach(row => {
+                const enrollmentStatus = row.getAttribute('data-status');
+                
+                if (status === 'all' || enrollmentStatus === status) {
+                    row.style.display = '';
+                    row.classList.add('animate__animated', 'animate__fadeIn');
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Show/hide empty state message
+            const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (visibleRows.length === 0 && status !== 'all') {
+                if (!emptyState) {
+                    const tbody = table.querySelector('tbody');
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.id = 'emptyState';
+                    emptyRow.innerHTML = `
+                        <td colspan="5" class="text-center py-4">
+                            <i class="fas fa-filter fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No ${status} enrollments found</h6>
+                            <p class="text-muted small">Try selecting a different filter or browse for new courses.</p>
+                        </td>
+                    `;
+                    tbody.appendChild(emptyRow);
+                }
+            } else if (emptyState) {
+                emptyState.remove();
+            }
+        }
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
     </script>
 </body>
 </html>

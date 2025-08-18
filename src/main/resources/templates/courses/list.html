@@ -31,16 +31,17 @@
                             <i class="fas fa-book me-1"></i>Courses
                         </a>
                     </li>
-                    <li class="nav-item" th:if="${user.role == 'INSTRUCTOR'}">
+                    <li class="nav-item" th:if="${user.role.name() == 'INSTRUCTOR'}">
                         <a class="nav-link" href="/courses/create">
                             <i class="fas fa-plus me-1"></i>Create Course
                         </a>
                     </li>
-                    <li class="nav-item" th:if="${user.role == 'STUDENT'}">
+                    <li class="nav-item" th:if="${user.role.name() == 'STUDENT'}">
                         <a class="nav-link" href="/enrollments">
                             <i class="fas fa-user-graduate me-1"></i>My Enrollments
                         </a>
                     </li>
+
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
@@ -70,28 +71,32 @@
             <div class="col-md-8">
                 <h2 class="mb-2">
                     <i class="fas fa-book me-2 text-primary"></i>
-                    <span th:if="${user.role == 'INSTRUCTOR'}">My Courses</span>
-                    <span th:if="${user.role == 'STUDENT'}">Available Courses</span>
+                    <span th:if="${user.role.name() == 'INSTRUCTOR'}">My Courses</span>
+                    <span th:if="${user.role.name() == 'STUDENT'}">Available Courses</span>
                 </h2>
-                <p class="text-muted" th:if="${user.role == 'INSTRUCTOR'}">Manage and organize your courses</p>
-                <p class="text-muted" th:if="${user.role == 'STUDENT'}">Browse and enroll in courses</p>
+                <p class="text-muted" th:if="${user.role.name() == 'INSTRUCTOR'}">Manage and organize your courses</p>
+                <p class="text-muted" th:if="${user.role.name() == 'STUDENT'}">Browse and enroll in courses</p>
+                
             </div>
             <div class="col-md-4 text-end">
-                <a th:if="${user.role == 'INSTRUCTOR'}" href="/courses/create" class="btn btn-primary">
+                <a th:if="${user.role.name() == 'INSTRUCTOR'}" href="/courses/create" class="btn btn-primary">
                     <i class="fas fa-plus me-1"></i>Create Course
                 </a>
+                
             </div>
         </div>
+
+        
 
         <!-- Courses Grid -->
         <div class="row" th:if="${courses != null and !courses.empty}">
             <div class="col-md-6 col-lg-4 mb-4" th:each="course : ${courses}">
                 <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body">
+                                         <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h5 class="card-title mb-0" th:text="${course.title}">Course Title</h5>
                             <span class="badge" 
-                                  th:classappend="${course.visibility == 'PUBLIC' ? 'bg-success' : 'bg-warning'}"
+                                  th:classappend="${course.visibility.name() == 'PUBLIC' ? 'bg-success' : 'bg-warning'}"
                                   th:text="${course.visibility}">PUBLIC</span>
                         </div>
                         <p class="card-text text-muted small" th:text="${course.description}">Course description</p>
@@ -116,7 +121,7 @@
                             <a th:href="@{/courses/{id}(id=${course.id})}" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-eye me-1"></i>View
                             </a>
-                            <div th:if="${user.role == 'STUDENT'}">
+                            <div th:if="${user.role.name() == 'STUDENT'}">
                                 <button th:if="${!course.isEnrolled}" 
                                         th:onclick="'enrollInCourse(' + ${course.id} + ')'" 
                                         class="btn btn-success btn-sm">
@@ -126,7 +131,7 @@
                                     <i class="fas fa-check me-1"></i>Enrolled
                                 </span>
                             </div>
-                            <div th:if="${user.role == 'INSTRUCTOR' and course.instructorId == user.id}">
+                            <div th:if="${user.role.name() == 'INSTRUCTOR'}">
                                 <a th:href="@{/courses/{id}/edit(id=${course.id})}" class="btn btn-outline-warning btn-sm me-1">
                                     <i class="fas fa-edit me-1"></i>Edit
                                 </a>
@@ -145,7 +150,7 @@
             <i class="fas fa-book fa-4x text-muted mb-4"></i>
             <h4 class="text-muted mb-3">No courses found</h4>
             <p class="text-muted mb-4">There are no courses available at the moment.</p>
-            <a th:if="${user.role == 'INSTRUCTOR'}" href="/courses/create" class="btn btn-primary">
+            <a th:if="${user.role.name() == 'INSTRUCTOR'}" href="/courses/create" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i>Create Your First Course
             </a>
         </div>
@@ -204,8 +209,8 @@
             modal.show();
             
             document.getElementById('confirmDelete').onclick = function() {
-                fetch(`/courses/${courseId}`, {
-                    method: 'DELETE',
+                fetch(`/courses/${courseId}/delete`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     }

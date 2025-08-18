@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${assignment.id != null ? 'Edit Assignment' : 'Create Assignment'} + ' - Sportal Admin'">Assignment Form - Sportal Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/admin/dashboard">
+            <i class="fas fa-graduation-cap me-2"></i>Sportal Admin
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/dashboard">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/users">
+                        <i class="fas fa-users me-1"></i>Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/courses">
+                        <i class="fas fa-book me-1"></i>Courses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/assignments">
+                        <i class="fas fa-tasks me-1"></i>Assignments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/enrollments">
+                        <i class="fas fa-user-check me-1"></i>Enrollments
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-shield me-1"></i>
+                        <span th:text="${session.user != null ? session.user.name : 'Admin'}">Admin</span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">
+                            <i class="fas fa-user-cog me-2"></i>Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/assignments">Assignments</a></li>
+                    <li class="breadcrumb-item active" th:text="${assignment.id != null ? 'Edit Assignment' : 'Create Assignment'}">Create Assignment</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">
+                                <i th:class="${assignment.id != null ? 'fas fa-edit' : 'fas fa-plus'} + ' me-2 text-primary'"></i>
+                                <span th:text="${assignment.id != null ? 'Edit Assignment' : 'Create New Assignment'}">Create New Assignment</span>
+                            </h2>
+                            <p class="text-muted mb-0" th:text="${assignment.id != null ? 'Update assignment details and settings' : 'Add a new assignment to a course'}">Add a new assignment to a course</p>
+                        </div>
+                        <a href="/assignments" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Assignments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Assignment Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clipboard-list me-2 text-primary"></i>Assignment Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="${assignment.id != null ? '/assignments/edit/' + assignment.id : '/assignments/create'}"
+                          method="post" th:object="${assignment}" novalidate>
+
+                        <!-- Hidden ID field for edit mode -->
+                        <input type="hidden" th:field="*{id}" th:if="${assignment.id != null}">
+
+                        <!-- Course Selection -->
+                        <div class="mb-3">
+                            <label for="courseId" class="form-label">
+                                Course <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-book text-muted"></i>
+                                </span>
+                                <select class="form-select" id="courseId" th:field="*{course.id}" required>
+                                    <option value="">Select Course</option>
+                                    <option th:each="courseOption : ${courses}"
+                                            th:value="${courseOption.id}"
+                                            th:text="${courseOption.title}"
+                                            th:selected="${assignment.course != null and assignment.course.id == courseOption.id}">Course Title</option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('course')}" th:errors="*{course}">
+                                Course is required
+                            </div>
+                        </div>
+
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">
+                                Assignment Title <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-heading text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control" id="title" th:field="*{title}"
+                                       placeholder="Enter assignment title" required maxlength="200">
+                            </div>
+                            <div class="form-text">Maximum 200 characters</div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+                                Title is required
+                            </div>
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" th:field="*{description}" rows="6"
+                                      placeholder="Enter detailed assignment description, instructions, and requirements..."></textarea>
+                            <div class="form-text">Provide clear instructions and requirements for students</div>
+                        </div>
+
+                        <!-- Due Date Field -->
+                        <div class="mb-3">
+                            <label for="dueDate" class="form-label">Due Date & Time</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-calendar-alt text-muted"></i>
+                                </span>
+                                <input type="datetime-local" class="form-control" id="dueDate" th:field="*{dueDate}">
+                            </div>
+                            <div class="form-text">Leave empty for no due date</div>
+                        </div>
+
+                        <!-- Max Score Field -->
+                        <div class="mb-4">
+                            <label for="maxScore" class="form-label">Maximum Score (Points)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-trophy text-muted"></i>
+                                </span>
+                                <input type="number" class="form-control" id="maxScore" th:field="*{maxScore}"
+                                       placeholder="100" min="0" step="0.01">
+                                <span class="input-group-text">pts</span>
+                            </div>
+                            <div class="form-text">Leave empty for no score limit</div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i th:class="${assignment.id != null ? 'fas fa-save' : 'fas fa-plus'} + ' me-2'"></i>
+                                <span th:text="${assignment.id != null ? 'Update Assignment' : 'Create Assignment'}">Create Assignment</span>
+                            </button>
+                            <a href="/assignments" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="button" class="btn btn-outline-info" onclick="previewAssignment()">
+                                <i class="fas fa-eye me-2"></i>Preview
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Help/Information -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2 text-info"></i>Assignment Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Required Fields</h6>
+                        <p class="text-muted small mb-0">Fields marked with <span class="text-danger">*</span> are required.</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Description Tips</h6>
+                        <ul class="list-unstyled small text-muted">
+                            <li><i class="fas fa-check text-success me-1"></i>Include clear objectives</li>
+                            <li><i class="fas fa-check text-success me-1"></i>List required materials</li>
+                            <li><i class="fas fa-check text-success me-1"></i>Specify submission format</li>
+                            <li><i class="fas fa-check text-success me-1"></i>Add evaluation criteria</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Due Date</h6>
+                        <p class="text-muted small mb-0">Set realistic deadlines considering student workload and course schedule.</p>
+                    </div>
+
+                    <div>
+                        <h6 class="fw-bold">Scoring</h6>
+                        <p class="text-muted small mb-0">Use consistent point values across similar assignments for fair grading.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Card -->
+            <div class="card border-0 shadow-sm" id="previewCard" style="display: none;">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-eye me-2 text-info"></i>Assignment Preview
+                    </h5>
+                </div>
+                <div class="card-body" id="previewContent">
+                    <!-- Preview content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center mt-5 py-4 bg-light border-top">
+    <p class="mb-0">&copy; 2024 Sportal - Student Portal System. All rights reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            const forms = document.getElementsByTagName('form');
+            Array.prototype.forEach.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Character counter for title field
+    document.getElementById('title').addEventListener('input', function() {
+        const maxLength = 200;
+        const currentLength = this.value.length;
+        const remaining = maxLength - currentLength;
+
+        // Find or create counter element
+        let counter = document.getElementById('title-counter');
+        if (!counter) {
+            counter = document.createElement('div');
+            counter.id = 'title-counter';
+            counter.className = 'form-text';
+            this.parentNode.parentNode.appendChild(counter);
+        }
+
+        counter.textContent = `${remaining} characters remaining`;
+        counter.className = remaining < 0 ? 'form-text text-danger' : 'form-text text-muted';
+
+        // Prevent further input if limit exceeded
+        if (remaining < 0) {
+            this.value = this.value.substring(0, maxLength);
+        }
+    });
+
+    // Set minimum due date to current date and time
+    document.addEventListener('DOMContentLoaded', function() {
+        const dueDateInput = document.getElementById('dueDate');
+        if (dueDateInput && !dueDateInput.value) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            dueDateInput.min = now.toISOString().slice(0, 16);
+
+            // Set default due date to 1 week from now
+            const defaultDue = new Date();
+            defaultDue.setDate(defaultDue.getDate() + 7);
+            defaultDue.setHours(23, 59, 0, 0);
+            defaultDue.setMinutes(defaultDue.getMinutes() - defaultDue.getTimezoneOffset());
+            dueDateInput.value = defaultDue.toISOString().slice(0, 16);
+        }
+    });
+
+    // Preview assignment functionality
+    function previewAssignment() {
+        const title = document.getElementById('title').value || 'Untitled Assignment';
+        const courseSelect = document.getElementById('courseId');
+        const courseName = courseSelect.options[courseSelect.selectedIndex]?.text || 'No Course Selected';
+        const description = document.getElementById('description').value || 'No description provided.';
+        const dueDate = document.getElementById('dueDate').value;
+        const maxScore = document.getElementById('maxScore').value;
+
+        let dueDateFormatted = 'No due date';
+        if (dueDate) {
+            const date = new Date(dueDate);
+            dueDateFormatted = date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        const previewContent = `
+        <div class="mb-3">
+            <h6 class="fw-bold text-primary">${title}</h6>
+            <small class="text-muted">Course: ${courseName}</small>
+        </div>
+        <div class="mb-3">
+            <p class="mb-0" style="white-space: pre-wrap;">${description}</p>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <small class="text-muted d-block">Due Date</small>
+                <span class="fw-bold">${dueDateFormatted}</span>
+            </div>
+            <div class="col-6">
+                <small class="text-muted d-block">Max Score</small>
+                <span class="fw-bold">${maxScore ? maxScore + ' points' : 'No limit'}</span>
+            </div>
+        </div>
+    `;
+
+        document.getElementById('previewContent').innerHTML = previewContent;
+        document.getElementById('previewCard').style.display = 'block';
+
+        // Scroll to preview
+        document.getElementById('previewCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Auto-save draft functionality (optional)
+    let autoSaveTimer;
+    function autoSaveDraft() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(function() {
+            const formData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                courseId: document.getElementById('courseId').value,
+                dueDate: document.getElementById('dueDate').value,
+                maxScore: document.getElementById('maxScore').value
+            };
+
+            // Store in localStorage as draft
+            localStorage.setItem('assignmentDraft', JSON.stringify(formData));
+
+            // Show saved indicator
+            showAutoSaveIndicator();
+        }, 2000); // Save after 2 seconds of inactivity
+    }
+
+    function showAutoSaveIndicator() {
+        let indicator = document.getElementById('autoSaveIndicator');
+        if (!indicator) {
+            indicator = document.createElement('small');
+            indicator.id = 'autoSaveIndicator';
+            indicator.className = 'text-success';
+            indicator.innerHTML = '<i class="fas fa-check me-1"></i>Draft saved';
+            document.querySelector('.card-header h5').appendChild(indicator);
+        }
+
+        indicator.style.display = 'inline';
+        setTimeout(() => {
+            indicator.style.display = 'none';
+        }, 2000);
+    }
+
+    // Load draft on page load (for create mode only)
+    document.addEventListener('DOMContentLoaded', function() {
+        const isEditMode = document.querySelector('input[type="hidden"][name="id"]');
+        if (!isEditMode) {
+            const draft = localStorage.getItem('assignmentDraft');
+            if (draft) {
+                const formData = JSON.parse(draft);
+                if (confirm('A draft was found. Would you like to restore it?')) {
+                    document.getElementById('title').value = formData.title || '';
+                    document.getElementById('description').value = formData.description || '';
+                    document.getElementById('courseId').value = formData.courseId || '';
+                    document.getElementById('dueDate').value = formData.dueDate || '';
+                    document.getElementById('maxScore').value = formData.maxScore || '';
+                }
+            }
+        }
+    });
+
+    // Add auto-save listeners
+    document.getElementById('title').addEventListener('input', autoSaveDraft);
+    document.getElementById('description').addEventListener('input', autoSaveDraft);
+    document.getElementById('courseId').addEventListener('change', autoSaveDraft);
+    document.getElementById('dueDate').addEventListener('change', autoSaveDraft);
+    document.getElementById('maxScore').addEventListener('input', autoSaveDraft);
+
+    // Clear draft on successful form submission
+    document.querySelector('form').addEventListener('submit', function() {
+        localStorage.removeItem('assignmentDraft');
+    });
+</script>
+</body>
+</html>
