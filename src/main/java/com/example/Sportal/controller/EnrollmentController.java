@@ -41,12 +41,19 @@ public class EnrollmentController {
             List<Enrollment> enrollments = new ArrayList<>();
             try {
                 enrollments = enrollmentService.getEnrollmentsByStudent(currentUser);
+                  if (enrollments == null) {
+                enrollments = new ArrayList<>();
+            }
             } catch (Exception e) {
                 System.err.println("Error fetching enrollments: " + e.getMessage());
                 e.printStackTrace();
             }
-            
+          
             model.addAttribute("enrollments", enrollments);
+            long enrolledCount = enrollments.stream().filter(e -> e.getStatus() == Enrollment.Status.ENROLLED).count();
+
+            model.addAttribute("enrolledCount", enrolledCount);
+
             return "enrollments/list";
             
         } catch (Exception e) {
@@ -74,13 +81,13 @@ public class EnrollmentController {
             
             enrollmentService.enrollStudent(currentUser, courseId);
             redirectAttributes.addFlashAttribute("success", "Successfully enrolled in course!");
-            return "redirect:/courses/" + courseId;
+            return "redirect:/enrollments";
             
         } catch (Exception e) {
             System.err.println("Error enrolling in course: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/courses/" + courseId;
+            return "redirect:/courses";
         }
     }
 

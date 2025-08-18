@@ -219,7 +219,6 @@ public class CoursesController {
                               BindingResult bindingResult,
                               Model model,
                               RedirectAttributes redirectAttributes) {
-                                System.out.println("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
         try {
             User currentUser = getCurrentUser();
             if (currentUser == null) {
