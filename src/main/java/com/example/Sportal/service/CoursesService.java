@@ -19,7 +19,9 @@ public interface CoursesService {
     List<CourseDto> getVisibleCoursesForUser(User user);
     
     List<CourseDto> getEnrolledCoursesForStudent(User student);
-    
+
+    List<Course> getByInstructor(User instructor);
+
     CourseDto getCourseById(Long id);
     
     CourseDto getCourseByCode(String code);

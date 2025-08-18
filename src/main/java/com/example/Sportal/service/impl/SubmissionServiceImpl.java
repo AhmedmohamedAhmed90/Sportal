@@ -97,6 +97,11 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
+    public List<Submission> getSubmissionByAssignments(List<Assignment> assignments){
+        return submissionRepository.findSubmissionsByAssignmentIn(assignments);
+    }
+
+    @Override
     public Submission gradeSubmission(Long submissionId, BigDecimal score, String feedback) {
         Submission submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new IllegalArgumentException("Submission not found"));

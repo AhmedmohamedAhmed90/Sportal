@@ -44,7 +44,7 @@ public class AdminController {
 
     public String adminDashboard(Model model) {
         model.addAttribute("totalUsers", usersService.getTotalUsersCount());
-//        model.addAttribute("totalCourses", courseService != null ? courseService.getTotalCoursesCount() : 0);
+        model.addAttribute("totalCourses", courseService != null ? courseService.getAllCourses().size() : 0);
 //        model.addAttribute("totalEnrollments", enrollmentService != null ? enrollmentService.getTotalEnrollmentsCount() : 0);
         model.addAttribute("totalInstructors", usersService.getUsersByRole(User.Role.INSTRUCTOR));
         model.addAttribute("activeUsers", usersService.getActiveUsersCount());

@@ -138,7 +138,7 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form th:action="@{/submission/{id}/submit(id=${assignment.id})}" method="post" enctype="multipart/form-data" id="submissionForm">
+                    <form th:action="@{/submissions/{id}/submit(id=${assignment.id})}" method="post" enctype="multipart/form-data" id="submissionForm">
                         <!-- File Upload Area -->
                         <div class="mb-4">
                             <label class="form-label fw-bold">Upload File <span class="text-danger">*</span></label>

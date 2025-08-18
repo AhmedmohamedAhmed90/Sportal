@@ -1,6 +1,7 @@
 package com.example.Sportal.service;
 
 import com.example.Sportal.models.entities.Assignment;
+import com.example.Sportal.models.entities.Course;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +16,7 @@ public interface AssignmentsService {
 
     Page<Assignment> searchAssignments(String searchTerm, Pageable pageable);
     Page<Assignment> getAssignmentsByCourse(Long courseId, Pageable pageable);
+    List<Assignment> getAssignmentsByCourses(List<Course> courses);
 
     Optional<Assignment> getAssignmentById(Long id);
     Assignment updateAssignment(Assignment assignment);

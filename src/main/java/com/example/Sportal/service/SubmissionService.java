@@ -1,5 +1,6 @@
 package com.example.Sportal.service;
 
+import com.example.Sportal.models.entities.Assignment;
 import com.example.Sportal.models.entities.Submission;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,8 @@ public interface SubmissionService {
     List<Submission> getStudentSubmissionsForAssignment(Long assignmentId, Long studentId);
 
     Optional<Submission> getSubmissionById(Long id);
+
+    List<Submission> getSubmissionByAssignments(List<Assignment> assignments);
 
     Submission gradeSubmission(Long submissionId, BigDecimal score, String feedback);
 

@@ -1,6 +1,10 @@
 package com.example.Sportal.controller;
 
 import com.example.Sportal.models.dto.course.CourseDto;
+import com.example.Sportal.models.entities.User;
+import com.example.Sportal.security.CustomUserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -42,6 +46,9 @@ public class AssignmentsController {
             @RequestParam(required = false) String status,
             Model model) {
 
+
+        User currentUser = getCurrentUser();
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Assignment> assignmentPage;
 
@@ -68,7 +75,7 @@ public class AssignmentsController {
         model.addAttribute("searchQuery", search);
         model.addAttribute("selectedCourseId", courseId);
         model.addAttribute("selectedStatus", status);
-
+        model.addAttribute("user",currentUser);
         model.addAttribute("totalAssignments", totalAssignments);
         model.addAttribute("overdueAssignments", overdueAssignments);
         model.addAttribute("totalSubmissions", totalSubmissions);
@@ -78,6 +85,8 @@ public class AssignmentsController {
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
+        User currentUser = getCurrentUser();
+        model.addAttribute("user", currentUser);
         model.addAttribute("assignment", new Assignment());
         model.addAttribute("courses", coursesService.getAllCourses());
         return "/assignments/form";
@@ -189,5 +198,37 @@ public class AssignmentsController {
         }
 
         return "redirect:/assignments";
+    }
+
+    private User getCurrentUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("=== Dashboard getCurrentUser Debug ===");
+            System.out.println("Authentication: " + authentication);
+
+            if (authentication != null) {
+                System.out.println("Principal: " + authentication.getPrincipal());
+                System.out.println("Principal type: " + authentication.getPrincipal().getClass().getName());
+                System.out.println("Is authenticated: " + authentication.isAuthenticated());
+                System.out.println("Is anonymous: " + "anonymousUser".equals(authentication.getPrincipal()));
+            }
+
+            if (authentication != null &&
+                    authentication.getPrincipal() instanceof CustomUserDetails &&
+                    !"anonymousUser".equals(authentication.getPrincipal()) &&
+                    authentication.isAuthenticated()) {
+
+                User user = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+                System.out.println("User retrieved: " + user.getName() + " (Role: " + user.getRole() + ")");
+                return user;
+            }
+
+            System.out.println("No valid authentication found - returning null");
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error getting current user: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 }

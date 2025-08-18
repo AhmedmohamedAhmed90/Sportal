@@ -1,11 +1,14 @@
 package com.example.Sportal.controller;
 
 
+import com.example.Sportal.models.dto.course.CourseDto;
 import com.example.Sportal.models.entities.Assignment;
+import com.example.Sportal.models.entities.Course;
 import com.example.Sportal.models.entities.Submission;
 import com.example.Sportal.models.entities.User;
 import com.example.Sportal.security.CustomUserDetails;
 import com.example.Sportal.service.AssignmentsService;
+import com.example.Sportal.service.CoursesService;
 import com.example.Sportal.service.SubmissionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -29,15 +32,17 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/submission")
+@RequestMapping("/submissions")
 @RequiredArgsConstructor
 @Slf4j
 public class SubmissionController {
 
     private final SubmissionService submissionService;
     private final AssignmentsService assignmentService;
+    private final CoursesService  coursesService;
 
     @GetMapping("/{assignmentId}/submit")
     @PreAuthorize("hasRole('STUDENT')")
@@ -76,41 +81,99 @@ public class SubmissionController {
                     "Assignment submitted successfully!");
             redirectAttributes.addFlashAttribute("submissionId", submission.getId());
 
-            return "redirect:/submission/" + assignmentId + "/submit";
+            return "redirect:/submissions/" + assignmentId + "/submit";
 
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/submission/" + assignmentId + "/submit";
+            return "redirect:/submissions/" + assignmentId + "/submit";
 
         } catch (IOException e) {
             log.error("File upload failed for assignment {}", assignmentId, e);
             redirectAttributes.addFlashAttribute("errorMessage",
                     "File upload failed. Please try again.");
-            return "redirect:/submission/" + assignmentId + "/submit";
+            return "redirect:/submissions/" + assignmentId + "/submit";
         }
     }
 
-    @GetMapping("/{assignmentId}/submissions")
+    @GetMapping()
     @PreAuthorize("hasRole('INSTRUCTOR')")
-    public String viewSubmissions(@PathVariable Long assignmentId, Model model, HttpSession session) {
-        User currentUser = (User) session.getAttribute("user");
+    public String viewSubmissions(@RequestParam(value = "search", required = false) String searchQuery,
+                                  @RequestParam(value = "assignmentId", required = false) Long selectedAssignmentId,
+                                  @RequestParam(value = "status", required = false) String selectedStatus,
+                                  Model model,
+                                  HttpSession session) {
 
-        Assignment assignment = assignmentService.getAssignmentById(assignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
-
-        if (!assignment.getCourse().getInstructor().getId().equals(currentUser.getId())) {
-            throw new IllegalArgumentException("Access denied");
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return "redirect:/login";
         }
 
-        List<Submission> submissions = submissionService.getSubmissionsByAssignment(assignmentId);
-        long submissionCount = submissionService.getSubmissionCount(assignmentId);
-        long ungraduatedCount = submissionService.getUngraduatedSubmissions(assignmentId).size();
+        List<Course> instructorCourses = coursesService.getByInstructor(currentUser);
 
-        model.addAttribute("assignment", assignment);
+        List<Assignment> instructorAssignments = assignmentService.getAssignmentsByCourses(instructorCourses);
+
+        // Get all submissions for instructor's assignments (with optional filters)
+        List<Submission> submissions;
+        if (selectedAssignmentId != null) {
+            // Filter by specific assignment
+            Assignment assignment = assignmentService.getAssignmentById(selectedAssignmentId)
+                    .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
+
+            // Verify instructor owns this assignment
+            if (!assignment.getCourse().getInstructor().getId().equals(currentUser.getId())) {
+                throw new IllegalArgumentException("Access denied");
+            }
+
+            submissions = submissionService.getSubmissionsByAssignment(selectedAssignmentId);
+        } else {
+            // Get all submissions for all instructor's assignments
+            submissions = submissionService.getSubmissionByAssignments(instructorAssignments);
+        }
+
+        if (selectedStatus != null && !selectedStatus.isEmpty()) {
+            switch (selectedStatus) {
+                case "graded":
+                    submissions = submissions.stream()
+                            .filter(sub -> sub.getScore() != null)
+                            .collect(Collectors.toList());
+                    break;
+                case "pending":
+                    submissions = submissions.stream()
+                            .filter(sub -> sub.getScore() == null)
+                            .collect(Collectors.toList());
+                    break;
+                case "late":
+                    submissions = submissions.stream()
+                            .filter(sub -> sub.getAssignment().getDueDate() != null &&
+                                    sub.getSubmittedAt().isAfter(sub.getAssignment().getDueDate()))
+                            .collect(Collectors.toList());
+                    break;
+            }
+        }
+
+        long totalSubmissions = submissions.size();
+        long gradedSubmissions = submissions.stream()
+                .mapToLong(sub -> sub.getScore() != null ? 1 : 0)
+                .sum();
+        long pendingSubmissions = totalSubmissions - gradedSubmissions;
+
+        Double averageScore = submissions.stream()
+                .filter(sub -> sub.getScore() != null)
+                .mapToDouble(sub -> sub.getScore().doubleValue())
+                .average()
+                .orElse(0.0);
+
         model.addAttribute("submissions", submissions);
-        model.addAttribute("submissionCount", submissionCount);
-        model.addAttribute("ungraduatedCount", ungraduatedCount);
+        model.addAttribute("assignments", instructorAssignments);
         model.addAttribute("user", currentUser);
+        model.addAttribute("searchQuery", searchQuery);
+        model.addAttribute("selectedAssignmentId", selectedAssignmentId);
+        model.addAttribute("selectedStatus", selectedStatus);
+
+        model.addAttribute("totalSubmissions", totalSubmissions);
+        model.addAttribute("gradedSubmissions", gradedSubmissions);
+        model.addAttribute("pendingSubmissions", pendingSubmissions);
+        model.addAttribute("averageScore", String.format("%.1f", averageScore));
 
         return "submissions/list";
     }
@@ -139,7 +202,7 @@ public class SubmissionController {
                                   RedirectAttributes redirectAttributes) {
 
         try {
-            User currentUser = (User) session.getAttribute("user");
+            User currentUser = getCurrentUser();
             Submission submission = submissionService.getSubmissionById(submissionId)
                     .orElseThrow(() -> new IllegalArgumentException("Submission not found"));
 
@@ -151,7 +214,7 @@ public class SubmissionController {
 
             redirectAttributes.addFlashAttribute("successMessage", "Submission graded successfully!");
 
-            return "redirect:/submission/" + submission.getAssignment().getId() + "/submissions";
+            return "redirect:/submissions";
 
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

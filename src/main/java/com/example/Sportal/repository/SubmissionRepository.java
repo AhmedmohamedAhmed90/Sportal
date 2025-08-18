@@ -2,6 +2,7 @@ package com.example.Sportal.repository;
 import com.example.Sportal.models.entities.Submission;
 import com.example.Sportal.models.entities.Assignment;
 import com.example.Sportal.models.entities.User;
+import org.modelmapper.internal.bytebuddy.dynamic.scaffold.subclass.SubclassDynamicTypeBuilder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +19,8 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     List<Submission> findByStudentIdOrderBySubmittedAtDesc(Long studentId);
 
     List<Submission> findByAssignmentAndStudentOrderBySubmittedAtDesc(Assignment assignment, User student);
+
+    List<Submission> findSubmissionsByAssignmentIn(List<Assignment> assignments);
 
     Optional<Submission> findByAssignmentIdAndStudentId(Long assignmentId, Long studentId);
 

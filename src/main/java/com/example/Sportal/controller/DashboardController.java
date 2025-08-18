@@ -39,7 +39,11 @@ public class DashboardController {
             }
             
             model.addAttribute("user", currentUser);
-            
+
+            if(currentUser.getRole() == User.Role.ADMIN){
+                return "redirect:/admin/dashboard";
+            }
+
             List<CourseDto> recentCourses = new ArrayList<>();
             int courseCount = 0;
             int totalStudents = 0;

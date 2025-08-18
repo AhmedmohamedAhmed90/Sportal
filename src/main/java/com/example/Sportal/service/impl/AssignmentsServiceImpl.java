@@ -1,6 +1,7 @@
 package com.example.Sportal.service.impl;
 
 import com.example.Sportal.models.entities.Assignment;
+import com.example.Sportal.models.entities.Course;
 import com.example.Sportal.repository.AssignmentsRepository;
 import com.example.Sportal.service.AssignmentsService;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,10 @@ public class AssignmentsServiceImpl implements AssignmentsService {
     @Override
     public Page<Assignment> getAssignmentsByCourse(Long courseId, Pageable pageable) {
         return assignmentsRepository.findByCourseId(courseId, pageable);
+    }
+
+    public List<Assignment> getAssignmentsByCourses(List<Course> courses) {
+        return assignmentsRepository.findAssignmentsByCourseIn(courses);
     }
 
     @Override

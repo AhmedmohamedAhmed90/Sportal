@@ -130,7 +130,11 @@ public class CoursesServiceImpl implements CoursesService {
                 .orElseThrow(() -> new RuntimeException("Course not found"));
         return convertToDto(course);
     }
-
+    @Override
+    public List<Course> getByInstructor(User instructor){
+        List<Course> courses = courseRepository.findByInstructor(instructor);
+        return courses;
+    }
     @Override
     public CourseDto createCourse(CreateCourseRequest request, User instructor) {
         if (courseRepository.existsByCode(request.getCode())) {

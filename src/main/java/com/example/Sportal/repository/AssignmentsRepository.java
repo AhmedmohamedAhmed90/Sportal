@@ -1,6 +1,7 @@
 package com.example.Sportal.repository;
 
 import com.example.Sportal.models.entities.Assignment;
+import com.example.Sportal.models.entities.Course;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +21,8 @@ public interface AssignmentsRepository extends JpaRepository<Assignment, Long> {
             String title, String description, Pageable pageable);
 
     void deleteAllAssignmentsByCourseId(long courseId);
+
+    List<Assignment> findAssignmentsByCourseIn(List<Course> courses);
 
     long countByDueDateAfter(LocalDateTime dateTime);
     long countByDueDateBefore(LocalDateTime dateTime);
