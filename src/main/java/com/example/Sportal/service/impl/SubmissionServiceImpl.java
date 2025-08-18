@@ -106,10 +106,13 @@ public class SubmissionServiceImpl implements SubmissionService {
         Submission submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new IllegalArgumentException("Submission not found"));
 
-        if (score.compareTo(BigDecimal.ZERO) < 0 ||
-                score.compareTo(submission.getAssignment().getMaxScore()) > 0) {
-            throw new IllegalArgumentException("Score must be between 0 and " +
-                    submission.getAssignment().getMaxScore());
+        if (score.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Score cannot be negative");
+        }
+
+        BigDecimal maxScore = submission.getAssignment().getMaxScore();
+        if (maxScore != null && score.compareTo(maxScore) > 0) {
+            throw new IllegalArgumentException("Score must be between 0 and " + maxScore);
         }
 
         submission.setScore(score);
@@ -252,7 +255,6 @@ public class SubmissionServiceImpl implements SubmissionService {
         existing.setFilePath(filePath);
         existing.setStatus(Submission.Status.RESUBMITTED);
         existing.setSubmittedAt(LocalDateTime.now());
-        // Reset grading when resubmitted
         existing.setScore(null);
         existing.setFeedback(comments);
 
