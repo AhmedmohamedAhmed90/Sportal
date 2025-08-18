@@ -120,12 +120,14 @@ public class AssignmentsController {
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<Assignment> assignmentOpt = assignmentsService.getAssignmentById(id);
+        User currentUser = getCurrentUser();
 
         if (assignmentOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Assignment not found.");
             return "redirect:/assignments";
         }
 
+        model.addAttribute("user", currentUser);
         model.addAttribute("assignment", assignmentOpt.get());
         model.addAttribute("courses", coursesService.getAllCourses());
         return "/assignments/form";
