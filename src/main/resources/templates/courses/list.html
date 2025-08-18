@@ -138,6 +138,9 @@
                                 <button th:onclick="'deleteCourse(' + ${course.id} + ')'" class="btn btn-outline-danger btn-sm">
                                     <i class="fas fa-trash me-1"></i>Delete
                                 </button>
+                                  <a th:href="@{/materials/upload/{courseId}(courseId=${course.id})}" class="btn btn-success btn-sm">
+                                      <i class="fas fa-upload me-1"></i>Upload Materials
+                                  </a>
                             </div>
                         </div>
                     </div>

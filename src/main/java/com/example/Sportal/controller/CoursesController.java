@@ -169,7 +169,8 @@ public class CoursesController {
 
             model.addAttribute("course", course);
 
-            boolean canAccess = course.getVisibility() == Course.Visibility.PUBLIC;
+            boolean canAccess = course.getVisibility() == Course.Visibility.PUBLIC||
+            currentUser.getRole() == User.Role.INSTRUCTOR;
 
             if (!canAccess) {
                 boolean isEnrolled = coursesService.isStudentEnrolledInCourse(currentUser, id);
@@ -260,7 +261,7 @@ public class CoursesController {
         }
     }
 
-    @PostMapping("/{id}/delete")
+    @DeleteMapping("/{id}/delete")
     @Transactional
     public String deleteCourse(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
