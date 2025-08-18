@@ -76,7 +76,7 @@
         </div>
 
         <!-- Enrollment Statistics -->
-        <div class="row mb-4" th:if="${enrollments and !enrollments.empty}">
+        <div class="row mb-4" th:if="${not #lists.isEmpty(enrollments)}">
             <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm text-center">
                     <div class="card-body">
@@ -88,7 +88,7 @@
             <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm text-center">
                     <div class="card-body">
-                        <h4 class="text-success mb-1" th:text="${enrollments.stream().filter(e -> e.status.name() == 'ENROLLED').count()}">4</h4>
+                        <h4 class="text-success mb-1" th:text="${enrolledCount}">4</h4>
                         <small class="text-muted">Active Courses</small>
                     </div>
                 </div>
@@ -96,7 +96,7 @@
             <div class="col-md-3 mb-3">
                 <div class="card border-0 shadow-sm text-center">
                     <div class="card-body">
-                        <h4 class="text-warning mb-1" th:text="${enrollments.stream().filter(e -> e.status.name() == 'PENDING').count()}">1</h4>
+                        <h4 class="text-warning mb-1" th:text="${enrolledCount}">1</h4>
                         <small class="text-muted">Pending Approval</small>
                     </div>
                 </div>
@@ -112,7 +112,7 @@
         </div>
 
         <!-- Enrollments List -->
-        <div class="row" th:if="${enrollments and !enrollments.empty}">
+        <div class="row" th:if="${not #lists.isEmpty(enrollments)}">
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-0">
@@ -168,7 +168,7 @@
                                                     <br>
                                                     <small class="text-muted">
                                                         <i class="fas fa-users me-1"></i>
-                                                        <span th:text="${enrollment.course.enrolledStudents + '/' + enrollment.course.capacity}">25/30</span> students
+                                                        <span th:text="${enrollment.course.capacity}">25/30</span> students
                                                     </small>
                                                 </div>
                                             </div>
@@ -221,7 +221,7 @@
         </div>
 
         <!-- Empty State -->
-        <div class="text-center py-5" th:if="${!enrollments or enrollments.empty}">
+        <div class="text-center py-5" th:if="${#lists.isEmpty(enrollments)}">
             <i class="fas fa-user-graduate fa-4x text-muted mb-4"></i>
             <h4 class="text-muted mb-3">No enrollments yet</h4>
             <p class="text-muted mb-4">You haven't enrolled in any courses yet. Browse available courses to get started!</p>
