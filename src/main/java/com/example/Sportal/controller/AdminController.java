@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final UsersService usersService;
@@ -37,7 +40,8 @@ public class AdminController {
         this.userMapper = userMapper;
     }
 
-    @GetMapping("/admin/dashboard")
+    @GetMapping("/dashboard")
+
     public String adminDashboard(Model model) {
         model.addAttribute("totalUsers", usersService.getTotalUsersCount());
 //        model.addAttribute("totalCourses", courseService != null ? courseService.getTotalCoursesCount() : 0);
@@ -51,7 +55,7 @@ public class AdminController {
     }
 
     // Admin Users Management View
-    @GetMapping("/admin/users")
+    @GetMapping("/users")
     public String adminUsers(Model model,
                              @RequestParam(defaultValue = "0") int page,
                              @RequestParam(defaultValue = "10") int size,
@@ -76,14 +80,14 @@ public class AdminController {
         return "admin/users";
     }
 
-    @GetMapping("/admin/users/create")
+    @GetMapping("/users/create")
     public String createUserForm(Model model) {
         model.addAttribute("user", new UserDto());
         model.addAttribute("roles", User.Role.values());
         return "admin/user-form";
     }
 
-    @GetMapping("/admin/users/edit/{id}")
+    @GetMapping("/users/edit/{id}")
     public String editUserForm(@PathVariable Long id, Model model) {
         Optional<User> user = usersService.findUserById(id);
         if (user.isPresent()) {
@@ -94,7 +98,7 @@ public class AdminController {
         return "redirect:/admin/users?error=User not found";
     }
 
-    @PostMapping("/admin/users/save")
+    @PostMapping("/users/save")
     public String saveUser(@ModelAttribute UserDto userDto) {
         try {
             User user = userMapper.mapFrom(userDto);
@@ -109,7 +113,7 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/admin/users/delete/{id}")
+    @PostMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
         String result = usersService.deleteUserById(id);
         return "redirect:/admin/users?message=" + result;

@@ -252,7 +252,7 @@ public class CoursesController {
         }
     }
 
-    @PostMapping("/{id}/delete")
+    @DeleteMapping("/{id}/delete")
     @Transactional
     public String deleteCourse(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
