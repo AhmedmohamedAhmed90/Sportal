@@ -147,6 +147,36 @@ public class EnrollmentController {
         }
     }
 
+    @PostMapping("/remove/{enrollmentId}")
+    @Transactional
+    public String removeEnrollment(@PathVariable Long enrollmentId, RedirectAttributes redirectAttributes) {
+        try {
+            User currentUser = getCurrentUser();
+            if (currentUser == null) {
+                return "redirect:/login";
+            }
+            
+            if (currentUser.getRole() != User.Role.INSTRUCTOR) {
+                redirectAttributes.addFlashAttribute("error", "Only instructors can remove enrollments.");
+                return "redirect:/courses";
+            }
+            
+            // Get the enrollment first to get the course ID before deleting
+            Enrollment enrollment = enrollmentService.getEnrollmentById(enrollmentId);
+            Long courseId = enrollment.getCourse().getId();
+            
+            enrollmentService.removeEnrollment(enrollmentId, currentUser);
+            redirectAttributes.addFlashAttribute("success", "Student removed from course successfully!");
+            return "redirect:/courses/" + courseId;
+            
+        } catch (Exception e) {
+            System.err.println("Error removing enrollment: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/courses";
+        }
+    }
+
     private User getCurrentUser() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

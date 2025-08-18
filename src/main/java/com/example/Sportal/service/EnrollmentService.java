@@ -17,5 +17,9 @@ public interface EnrollmentService {
     
     void updateEnrollmentStatus(Long enrollmentId, Enrollment.Status status, User instructor);
     
+    void removeEnrollment(Long enrollmentId, User instructor);
+    
+    Enrollment getEnrollmentById(Long enrollmentId);
+    
     boolean isEnrolled(User student, Long courseId);
 }

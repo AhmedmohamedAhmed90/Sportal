@@ -87,6 +87,24 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public void removeEnrollment(Long enrollmentId, User instructor) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new RuntimeException("Enrollment not found"));
+        
+        if (!enrollment.getCourse().getInstructor().getId().equals(instructor.getId())) {
+            throw new RuntimeException("Only the course instructor can remove enrollments");
+        }
+        
+        enrollmentRepository.delete(enrollment);
+    }
+
+    @Override
+    public Enrollment getEnrollmentById(Long enrollmentId) {
+        return enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new RuntimeException("Enrollment not found"));
+    }
+
+    @Override
     public boolean isEnrolled(User student, Long courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));

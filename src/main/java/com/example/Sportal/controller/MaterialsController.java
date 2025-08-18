@@ -145,9 +145,12 @@ public class MaterialsController {
                 return "redirect:/courses";
             }
             
+            MaterialDto material = materialsService.getMaterialById(id, currentUser);
+            Long courseId = material.getCourseId();
+            
             materialsService.deleteMaterial(id, currentUser);
             redirectAttributes.addFlashAttribute("success", "Material deleted successfully!");
-            return "redirect:/courses";
+            return "redirect:/materials/course/" + courseId;
             
         } catch (Exception e) {
             System.err.println("Error deleting material: " + e.getMessage());
@@ -167,7 +170,6 @@ public class MaterialsController {
             
             Resource resource = materialsService.downloadMaterial(id, currentUser);
             
-            // Get the original filename
             String filename = "material";
             try {
                 String resourceFilename = resource.getFilename();
@@ -175,7 +177,7 @@ public class MaterialsController {
                     filename = resourceFilename.substring(resourceFilename.indexOf("_") + 1);
                 }
             } catch (Exception e) {
-                // Use default filename if extraction fails
+                // 
             }
             
             return ResponseEntity.ok()

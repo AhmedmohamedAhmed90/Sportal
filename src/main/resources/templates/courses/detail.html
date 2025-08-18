@@ -288,13 +288,166 @@
                                     </ul>
                                 </nav>
                             </div>
+
+                            <!-- Empty state for assignments -->
+                            <div class="text-center py-4" th:if="${assignments == null or !assignments.hasContent()}">
+                                <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted mb-2">No assignments yet</h6>
+                                <p class="text-muted small" th:if="${user.role.name() == 'STUDENT'}">Assignments will appear here once created by the instructor.</p>
+                                <p class="text-muted small" th:if="${user.role.name() == 'INSTRUCTOR'}">Start by creating your first assignment for this course.</p>
+                            </div>
                         </div>
 
-                        <div class="text-center py-4" th:if="${assignments == null or !assignments.hasContent()}">
-                            <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
-                            <h6 class="text-muted mb-2">No assignments yet</h6>
-                            <p class="text-muted small" th:if="${user.role.name() == 'STUDENT'}">Assignments will appear here once created by the instructor.</p>
-                            <p class="text-muted small" th:if="${user.role.name() == 'INSTRUCTOR'}">Start by creating your first assignment for this course.</p>
+                    <!-- Materials Tab -->
+                    <div class="tab-pane fade" id="materials" role="tabpanel"
+                         th:if="${user.role.name() == 'INSTRUCTOR' or (user.role.name() == 'STUDENT' and isEnrolled)}">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Course Materials</h5>
+                            <button th:if="${user.role.name() == 'INSTRUCTOR' and course.instructorId == user.id}"
+                                    class="btn btn-primary btn-sm"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#uploadModal">
+                                <i class="fas fa-plus me-1"></i>Upload Material
+                            </button>
+                        </div>
+
+                        <div th:if="${materials != null and !materials.empty}">
+                            <div class="row">
+                                <div class="col-12 mb-3" th:each="material : ${materials}">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="d-flex align-items-start justify-content-between mb-2">
+                                                        <h6 class="card-title mb-0" th:text="${material.title}">Material Title</h6>
+                                                        <span th:if="${material.visibility.name() == 'PUBLIC'}" class="badge bg-success ms-2">
+                                                            <i class="fas fa-globe me-1"></i>Public
+                                                        </span>
+                                                        <span th:if="${material.visibility.name() == 'ENROLLED'}" class="badge bg-warning ms-2">
+                                                            <i class="fas fa-users me-1"></i>Enrolled Only
+                                                        </span>
+                                                    </div>
+                                                    <p class="card-text text-muted mb-2" th:text="${material.description != null ? material.description : 'No description'}">Material description</p>
+                                                                                                         <div class="d-flex flex-wrap gap-2 align-items-center">
+                                                         <small class="text-muted">
+                                                             <i class="fas fa-calendar me-1"></i>
+                                                             <span th:text="${#temporals.format(material.uploadedAt, 'MMM dd, yyyy')}">Jan 15, 2024</span>
+                                                         </small>
+                                                         <small class="text-muted" th:if="${material.fileSize != null}">
+                                                             <i class="fas fa-file me-1"></i>
+                                                             <span th:text="${#numbers.formatDecimal(material.fileSize / 1024, 1, 2)} + ' KB'">1.5 KB</span>
+                                                         </small>
+                                                     </div>
+                                                </div>
+                                                <div class="col-md-4 text-end">
+                                                    <div class="d-flex gap-2 justify-content-end">
+                                                        <a th:href="@{/materials/{id}/download(id=${material.id})}" 
+                                                           class="btn btn-outline-primary btn-sm"
+                                                           title="Download">
+                                                            <i class="fas fa-download me-1"></i>Download
+                                                        </a>
+                                                        <button th:if="${user.role.name() == 'INSTRUCTOR' and course.instructorId == user.id}"
+                                                                th:onclick="'deleteMaterial(' + ${material.id} + ')'" 
+                                                                class="btn btn-outline-danger btn-sm"
+                                                                title="Delete">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center py-4" th:if="${materials == null or materials.empty}">
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted mb-2">No materials yet</h6>
+                            <p class="text-muted small" th:if="${user.role.name() == 'STUDENT'}">Materials will appear here once uploaded by the instructor.</p>
+                            <p class="text-muted small" th:if="${user.role.name() == 'INSTRUCTOR'}">Start by uploading your first material for this course.</p>
+                            <button th:if="${user.role.name() == 'INSTRUCTOR' and course.instructorId == user.id}"
+                                    class="btn btn-primary btn-sm"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#uploadModal">
+                                <i class="fas fa-upload me-1"></i>Upload First Material
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Enrollments Tab -->
+                    <div class="tab-pane fade" id="enrollments" role="tabpanel"
+                         th:if="${user.role.name() == 'INSTRUCTOR' and course.instructorId == user.id}">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Course Enrollments</h5>
+                            <span class="badge bg-primary fs-6">
+                                <i class="fas fa-users me-1"></i>
+                                <span th:text="${enrollments != null ? enrollments.size() : 0}">0</span> enrolled
+                            </span>
+                        </div>
+
+                        <div th:if="${enrollments != null and !enrollments.empty}">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>
+                                                                <i class="fas fa-user me-1"></i>Student Name
+                                                            </th>
+                                                            <th>
+                                                                <i class="fas fa-envelope me-1"></i>Email
+                                                            </th>
+                                                            <th>
+                                                                <i class="fas fa-calendar me-1"></i>Enrolled Date
+                                                            </th>
+                                                            <th>
+                                                                <i class="fas fa-cog me-1"></i>Actions
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                                                                                 <tr th:each="enrollment : ${enrollments}">
+                                                             <td>
+                                                                 <div class="d-flex align-items-center">
+                                                                     <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                                         <i class="fas fa-user text-white"></i>
+                                                                     </div>
+                                                                     <div>
+                                                                         <strong th:text="${enrollment.student.name}">Student Name</strong>
+                                                                     </div>
+                                                                 </div>
+                                                             </td>
+                                                             <td>
+                                                                 <span class="text-muted" th:text="${enrollment.student.email}">student@email.com</span>
+                                                             </td>
+                                                             <td>
+                                                                 <span class="text-muted" th:text="${#temporals.format(enrollment.enrolledAt, 'MMM dd, yyyy')}">Jan 15, 2024</span>
+                                                             </td>
+                                                            <td>
+                                                                <button th:onclick="'removeEnrollment(' + ${enrollment.id} + ')'" 
+                                                                        class="btn btn-outline-danger btn-sm"
+                                                                        title="Remove from course">
+                                                                    <i class="fas fa-user-minus"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center py-4" th:if="${enrollments == null or enrollments.empty}">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted mb-2">No enrollments yet</h6>
+                            <p class="text-muted small">Students will appear here once they enroll in this course.</p>
                         </div>
                     </div>
 
@@ -363,7 +516,7 @@
                 <h5 class="modal-title" id="uploadModalLabel">Upload Material</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form th:action="@{/materials/upload}" method="post" enctype="multipart/form-data">
+            <form th:action="@{/materials/upload/{courseId}(courseId=${course.id})}" method="post" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="title" class="form-label">Material Title *</label>
@@ -484,8 +637,8 @@
 
     function deleteMaterial(materialId) {
         if (confirm('Are you sure you want to delete this material? This action cannot be undone.')) {
-            fetch(`/materials/${materialId}`, {
-                method: 'DELETE',
+            fetch(`/materials/${materialId}/delete`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 }
@@ -517,6 +670,28 @@
                         location.reload();
                     } else {
                         alert('Failed to delete assignment. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
+    }
+
+    function removeEnrollment(enrollmentId) {
+        if (confirm('Are you sure you want to remove this student from the course? This action cannot be undone.')) {
+            fetch(`/enrollments/remove/${enrollmentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to remove student from course. Please try again.');
                     }
                 })
                 .catch(error => {

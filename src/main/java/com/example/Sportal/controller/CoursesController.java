@@ -3,6 +3,8 @@ package com.example.Sportal.controller;
 import com.example.Sportal.models.dto.course.CourseDto;
 import com.example.Sportal.models.dto.course.CreateCourseRequest;
 import com.example.Sportal.models.dto.course.UpdateCourseRequest;
+import com.example.Sportal.models.dto.material.MaterialDto;
+import com.example.Sportal.models.entities.Enrollment;
 import com.example.Sportal.models.entities.Assignment;
 import com.example.Sportal.models.entities.Course;
 import com.example.Sportal.models.entities.User;
@@ -10,6 +12,8 @@ import com.example.Sportal.repository.CourseRepository;
 import com.example.Sportal.security.CustomUserDetails;
 import com.example.Sportal.service.AssignmentsService;
 import com.example.Sportal.service.CoursesService;
+import com.example.Sportal.service.MaterialsService;
+import com.example.Sportal.service.EnrollmentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,6 +44,12 @@ public class CoursesController {
 
     @Autowired
     private AssignmentsService assignmentsService;
+
+    @Autowired
+    private MaterialsService materialsService;
+
+    @Autowired
+    private EnrollmentService enrollmentService;
 
     @GetMapping
     @Transactional
@@ -188,6 +198,26 @@ public class CoursesController {
             Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
             Page<Assignment> assignments = assignmentsService.getAssignmentsByCourse(id,pageable);
             model.addAttribute("assignments", assignments);
+
+            try {
+                List<MaterialDto> materials = materialsService.getMaterialsByCourse(id, currentUser);
+                model.addAttribute("materials", materials);
+            } catch (Exception e) {
+                System.err.println("Error fetching materials: " + e.getMessage());
+                e.printStackTrace();
+                model.addAttribute("materials", new ArrayList<>());
+            }
+
+            if (currentUser.getRole() == User.Role.INSTRUCTOR && course.getInstructorId().equals(currentUser.getId())) {
+                try {
+                    List<Enrollment> enrollments = enrollmentService.getEnrollmentsByCourse(id);
+                    model.addAttribute("enrollments", enrollments);
+                } catch (Exception e) {
+                    System.err.println("Error fetching enrollments: " + e.getMessage());
+                    e.printStackTrace();
+                    model.addAttribute("enrollments", new ArrayList<>());
+                }
+            }
 
             return "courses/detail";
         } catch (Exception e) {

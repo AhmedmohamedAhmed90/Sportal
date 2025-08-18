@@ -52,7 +52,6 @@ public class AssignmentsController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Assignment> assignmentPage;
 
-        // Apply filters based on parameters
         if (search != null && !search.trim().isEmpty()) {
             assignmentPage = assignmentsService.searchAssignments(search, pageable);
         } else if (courseId != null) {
@@ -178,7 +177,6 @@ public class AssignmentsController {
         return "/assignments/view";
     }
 
-    // Delete assignment
     @PostMapping("/delete/{id}")
     public String deleteAssignment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
