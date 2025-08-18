@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Materials - Sportal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">
+            <i class="fas fa-graduation-cap me-2"></i>Sportal
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-home me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/courses">
+                        <i class="fas fa-book me-1"></i>Courses
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${user.name}">User</span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile"><i class="fas fa-user-cog me-2"></i>Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-2">
+                <i class="fas fa-upload me-2 text-success"></i>Upload Materials
+            </h2>
+            <p class="text-muted">Attach files and details for your course</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <!-- Error / Success Alerts -->
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+                    <!-- Upload Form -->
+                    <form th:action="@{/materials/upload/{courseId}(courseId=${courseId})}" 
+                          th:object="${createMaterialRequest}"
+                          method="post" enctype="multipart/form-data">
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-bold">Title</label>
+                            <input type="text" th:field="*{title}" class="form-control" id="title" placeholder="Enter material title">
+                            <div class="text-danger small" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold">Description</label>
+                            <textarea th:field="*{description}" class="form-control" id="description" rows="3" placeholder="Enter material description"></textarea>
+                            <div class="text-danger small" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="mb-3">
+                            <label for="file" class="form-label fw-bold">Choose File</label>
+                            <input class="form-control" type="file" id="file" name="file" required>
+                        </div>
+
+                        <!-- Visibility -->
+                        <div class="mb-3">
+                            <label for="visibility" class="form-label fw-bold">Visibility</label>
+                            <select th:field="*{visibility}" class="form-select" id="visibility">
+                                <option value="PUBLIC">Public</option>
+                                <option value="ENROLLED">Enrolled Students Only</option>
+                            </select>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/courses/{id}(id=${courseId})}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Course
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-upload me-1"></i>Upload
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center mt-5 py-4 bg-light border-top">
+    <p class="mb-0">&copy; Sportal - Student Portal System. All rights reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

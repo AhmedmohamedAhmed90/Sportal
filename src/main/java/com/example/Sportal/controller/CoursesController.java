@@ -159,10 +159,12 @@ public class CoursesController {
 
             model.addAttribute("course", course);
 
-            boolean canAccess = course.getVisibility() == Course.Visibility.PUBLIC;
+            boolean canAccess = course.getVisibility() == Course.Visibility.PUBLIC|| 
+            currentUser.getRole() == User.Role.INSTRUCTOR;
 
             if (!canAccess) {
                 boolean isEnrolled = coursesService.isStudentEnrolledInCourse(currentUser, id);
+
                 if (!isEnrolled) {
                     model.addAttribute("error", "You don't have access to this course.");
                     return "error";
@@ -173,6 +175,7 @@ public class CoursesController {
                 boolean isEnrolled = coursesService.isStudentEnrolledInCourse(currentUser, id);
                 model.addAttribute("isEnrolled", isEnrolled);
             }
+
 
             return "courses/detail";
         } catch (Exception e) {
