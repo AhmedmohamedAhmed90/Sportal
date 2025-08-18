@@ -55,7 +55,7 @@ public class CoursesController {
                 System.out.println("Courses fetched: " + (courses != null ? courses.size() : "null"));
                 System.out.println("Courses object: " + courses);
                 
-                // Ensure service didn't return null
+               
                 if (courses == null) {
                     System.out.println("Service returned null, creating empty list");
                     courses = new ArrayList<>();
@@ -69,11 +69,7 @@ public class CoursesController {
             System.out.println("Final courses to be added to model: " + (courses != null ? courses.size() : "null"));
             System.out.println("Final courses object: " + courses);
             
-            // Ensure courses is never null
-            if (courses == null) {
-                courses = new ArrayList<>();
-                System.out.println("Courses was null, created new empty ArrayList");
-            }
+        
             
             model.addAttribute("courses", courses);
             return "courses/list";
@@ -163,22 +159,23 @@ public class CoursesController {
 
             model.addAttribute("course", course);
 
-            boolean canAccess = course.getVisibility() == Course.Visibility.PUBLIC;
+            boolean canAccess = course.getVisibility() == Course.Visibility.PUBLIC|| 
+            currentUser.getRole() == User.Role.INSTRUCTOR;
 
             if (!canAccess) {
-                // If course is private, check enrollment
                 boolean isEnrolled = coursesService.isStudentEnrolledInCourse(currentUser, id);
+
                 if (!isEnrolled) {
                     model.addAttribute("error", "You don't have access to this course.");
                     return "error";
                 }
             }
 
-            // If user is a student, mark enrollment status
             if (currentUser.getRole() == User.Role.STUDENT) {
                 boolean isEnrolled = coursesService.isStudentEnrolledInCourse(currentUser, id);
                 model.addAttribute("isEnrolled", isEnrolled);
             }
+
 
             return "courses/detail";
         } catch (Exception e) {

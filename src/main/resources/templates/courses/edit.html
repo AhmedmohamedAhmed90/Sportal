@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Course - Sportal</title>
+    <title th:text="'Edit ' + ${course.title} + ' - Sportal'">Edit Course - Sportal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -32,7 +32,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/courses/create">
+                        <a class="nav-link" href="/courses/create">
                             <i class="fas fa-plus me-1"></i>Create Course
                         </a>
                     </li>
@@ -64,18 +64,18 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="d-flex align-items-center mb-3">
-                    <a href="/courses" class="btn btn-outline-secondary me-3">
-                        <i class="fas fa-arrow-left me-1"></i>Back to Courses
+                    <a th:href="@{/courses/{id}(id=${course.id})}" class="btn btn-outline-secondary me-3">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Course
                     </a>
                     <h2 class="mb-0">
-                        <i class="fas fa-plus me-2 text-primary"></i>Create New Course
+                        <i class="fas fa-edit me-2 text-primary"></i>Edit Course
                     </h2>
                 </div>
-                <p class="text-muted">Fill in the details below to create a new course for your students.</p>
+                <p class="text-muted">Update the course information below. Changes will be reflected immediately.</p>
             </div>
         </div>
 
-        <!-- Create Course Form -->
+        <!-- Edit Course Form -->
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm">
@@ -85,7 +85,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form th:action="@{/courses}" th:object="${createCourseRequest}" method="post" novalidate>
+                        <form th:action="@{/courses/{id}/edit(id=${course.id})}" method="post" novalidate>
                             <!-- Alert Messages -->
                             <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
@@ -97,36 +97,32 @@
                                 <!-- Course Code -->
                                 <div class="col-md-6 mb-3">
                                     <label for="code" class="form-label">
-                                        <i class="fas fa-hashtag me-1"></i>Course Code *
+                                        <i class="fas fa-hashtag me-1"></i>Course Code
                                     </label>
                                     <input type="text" 
                                            class="form-control" 
                                            id="code" 
-                                           th:field="*{code}"
+                                           name="code"
+                                           th:value="${course.code}"
                                            placeholder="e.g., CS101, MATH201"
-                                           th:classappend="${#fields.hasErrors('code')} ? 'is-invalid' : ''"
-                                           required>
-                                    <div th:if="${#fields.hasErrors('code')}" class="invalid-feedback">
-                                        <span th:errors="*{code}">Code error</span>
-                                    </div>
+                                           minlength="3" 
+                                           maxlength="50">
                                     <div class="form-text">Unique identifier for your course (3-50 characters)</div>
                                 </div>
 
                                 <!-- Course Title -->
                                 <div class="col-md-6 mb-3">
                                     <label for="title" class="form-label">
-                                        <i class="fas fa-heading me-1"></i>Course Title *
+                                        <i class="fas fa-heading me-1"></i>Course Title
                                     </label>
                                     <input type="text" 
                                            class="form-control" 
                                            id="title" 
-                                           th:field="*{title}"
+                                           name="title"
+                                           th:value="${course.title}"
                                            placeholder="e.g., Introduction to Computer Science"
-                                           th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
-                                           required>
-                                    <div th:if="${#fields.hasErrors('title')}" class="invalid-feedback">
-                                        <span th:errors="*{title}">Title error</span>
-                                    </div>
+                                           minlength="3" 
+                                           maxlength="200">
                                     <div class="form-text">Full name of your course (3-200 characters)</div>
                                 </div>
                             </div>
@@ -140,12 +136,10 @@
                                     <input type="text" 
                                            class="form-control" 
                                            id="semester" 
-                                           th:field="*{semester}"
+                                           name="semester"
+                                           th:value="${course.semester}"
                                            placeholder="e.g., Fall 2024, Spring 2025"
-                                           th:classappend="${#fields.hasErrors('semester')} ? 'is-invalid' : ''">
-                                    <div th:if="${#fields.hasErrors('semester')}" class="invalid-feedback">
-                                        <span th:errors="*{semester}">Semester error</span>
-                                    </div>
+                                           maxlength="20">
                                     <div class="form-text">Academic term when the course is offered</div>
                                 </div>
 
@@ -156,14 +150,11 @@
                                     <input type="number" 
                                            class="form-control" 
                                            id="capacity" 
-                                           th:field="*{capacity}"
+                                           name="capacity"
+                                           th:value="${course.capacity}"
                                            placeholder="e.g., 30"
                                            min="1" 
-                                           max="500"
-                                           th:classappend="${#fields.hasErrors('capacity')} ? 'is-invalid' : ''">
-                                    <div th:if="${#fields.hasErrors('capacity')}" class="invalid-feedback">
-                                        <span th:errors="*{capacity}">Capacity error</span>
-                                    </div>
+                                           max="500">
                                     <div class="form-text">Maximum number of students allowed (optional)</div>
                                 </div>
                             </div>
@@ -171,20 +162,13 @@
                             <!-- Visibility -->
                             <div class="mb-3">
                                 <label for="visibility" class="form-label">
-                                    <i class="fas fa-eye me-1"></i>Course Visibility *
+                                    <i class="fas fa-eye me-1"></i>Course Visibility
                                 </label>
-                                <select class="form-select" 
-                                        id="visibility" 
-                                        th:field="*{visibility}"
-                                        th:classappend="${#fields.hasErrors('visibility')} ? 'is-invalid' : ''"
-                                        required>
-                                    <option value="">Select visibility option</option>
-                                    <option value="PUBLIC">Public - Visible to all students</option>
-                                    <option value="PRIVATE">Private - Only enrolled students can see</option>
+                                <select class="form-select" id="visibility" name="visibility">
+                                    <option value="">Keep current visibility</option>
+                                                                    <option value="PUBLIC" th:selected="${course.visibility.name() == 'PUBLIC'}">Public - Visible to all students</option>
+                                <option value="PRIVATE" th:selected="${course.visibility.name() == 'PRIVATE'}">Private - Only enrolled students can see</option>
                                 </select>
-                                <div th:if="${#fields.hasErrors('visibility')}" class="invalid-feedback">
-                                    <span th:errors="*{visibility}">Visibility error</span>
-                                </div>
                                 <div class="form-text">Choose who can see and enroll in this course</div>
                             </div>
 
@@ -195,26 +179,63 @@
                                 </label>
                                 <textarea class="form-control" 
                                           id="description" 
-                                          th:field="*{description}"
+                                          name="description"
                                           rows="5"
                                           placeholder="Provide a detailed description of your course, including learning objectives, topics covered, and any prerequisites..."
-                                          th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"></textarea>
-                                <div th:if="${#fields.hasErrors('description')}" class="invalid-feedback">
-                                    <span th:errors="*{description}">Description error</span>
-                                </div>
+                                          th:text="${course.description}"></textarea>
                                 <div class="form-text">Detailed information about the course content and objectives</div>
                             </div>
 
                             <!-- Form Actions -->
                             <div class="d-flex justify-content-between align-items-center">
-                                <a href="/courses" class="btn btn-outline-secondary">
+                                <a th:href="@{/courses/{id}(id=${course.id})}" class="btn btn-outline-secondary">
                                     <i class="fas fa-times me-1"></i>Cancel
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i>Create Course
+                                    <i class="fas fa-save me-1"></i>Update Course
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+
+                <!-- Course Statistics Card -->
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-white border-0">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-bar me-2 text-info"></i>Course Statistics
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <div class="border-end">
+                                    <h4 class="text-primary mb-1" th:text="${course.enrolledStudents}">25</h4>
+                                    <small class="text-muted">Enrolled Students</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="border-end">
+                                    <h4 class="text-success mb-1" th:text="${(course.capacity != null and course.enrolledStudents != null) 
+            ? (course.capacity - course.enrolledStudents) 
+            : '∞'}"
+>5</h4>
+                                    <small class="text-muted">Available Spots</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="border-end">
+                                    <h4 class="text-info mb-1" th:text="${#temporals.format(course.createdAt, 'MMM dd')}">Jan 15</h4>
+                                    <small class="text-muted">Created Date</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div>
+                                    <h4 class="text-warning mb-1" th:text="${course.visibility}">PUBLIC</h4>
+                                    <small class="text-muted">Visibility</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -222,26 +243,22 @@
                 <div class="card border-0 shadow-sm mt-4">
                     <div class="card-header bg-white border-0">
                         <h6 class="mb-0">
-                            <i class="fas fa-question-circle me-2 text-info"></i>Tips for Creating a Great Course
+                            <i class="fas fa-lightbulb me-2 text-warning"></i>Editing Tips
                         </h6>
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
                             <li class="mb-2">
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                                Use a clear, descriptive course title that students can easily understand
+                                <i class="fas fa-info-circle text-info me-2"></i>
+                                Changes to course visibility will affect how students can discover and enroll in your course
                             </li>
                             <li class="mb-2">
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                                Provide a comprehensive description that outlines what students will learn
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                                Set an appropriate capacity based on your teaching resources and classroom size
+                                <i class="fas fa-info-circle text-info me-2"></i>
+                                Reducing capacity below current enrollment count may affect existing students
                             </li>
                             <li class="mb-0">
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                                Choose visibility carefully - public courses are discoverable by all students
+                                <i class="fas fa-info-circle text-info me-2"></i>
+                                Course code changes should be communicated to enrolled students
                             </li>
                         </ul>
                     </div>
@@ -265,21 +282,46 @@
 
         // Form validation enhancement
         document.querySelector('form').addEventListener('submit', function(e) {
-            const requiredFields = this.querySelectorAll('[required]');
+            const codeField = document.getElementById('code');
+            const titleField = document.getElementById('title');
             let isValid = true;
 
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    field.classList.remove('is-invalid');
-                }
-            });
+            // Validate code
+            if (codeField.value.trim() && (codeField.value.length < 3 || codeField.value.length > 50)) {
+                codeField.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                codeField.classList.remove('is-invalid');
+            }
+
+            // Validate title
+            if (titleField.value.trim() && (titleField.value.length < 3 || titleField.value.length > 200)) {
+                titleField.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                titleField.classList.remove('is-invalid');
+            }
 
             if (!isValid) {
                 e.preventDefault();
-                alert('Please fill in all required fields marked with *.');
+                alert('Please check the form for validation errors.');
+            }
+        });
+
+        // Real-time validation
+        document.getElementById('code').addEventListener('input', function() {
+            if (this.value.length > 0 && (this.value.length < 3 || this.value.length > 50)) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('title').addEventListener('input', function() {
+            if (this.value.length > 0 && (this.value.length < 3 || this.value.length > 200)) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
             }
         });
     </script>

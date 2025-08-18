@@ -226,7 +226,7 @@ public class CoursesServiceImpl implements CoursesService {
         dto.setVisibility(course.getVisibility());
         dto.setCreatedAt(course.getCreatedAt());
         
-        // Count enrolled students (with null safety)
+        
         long enrolledCount = 0;
         if (course.getEnrollments() != null) {
             enrolledCount = course.getEnrollments().stream()

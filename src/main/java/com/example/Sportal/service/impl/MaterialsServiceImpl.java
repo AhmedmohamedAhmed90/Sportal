@@ -87,14 +87,12 @@ public class MaterialsServiceImpl implements MaterialsService {
             throw new RuntimeException("File cannot be empty");
         }
         
-        // Validate file type
         String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
         String fileExtension = getFileExtension(originalFilename);
         if (!isValidFileType(fileExtension)) {
             throw new RuntimeException("Invalid file type. Allowed types: PDF, DOC, DOCX, PPT, PPTX, JPG, PNG");
         }
         
-        // Create upload directory if it doesn't exist
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             try {
@@ -104,7 +102,6 @@ public class MaterialsServiceImpl implements MaterialsService {
             }
         }
         
-        // Generate unique filename
         String fileName = UUID.randomUUID().toString() + "_" + originalFilename;
         Path filePath = uploadPath.resolve(fileName);
         
@@ -118,7 +115,7 @@ public class MaterialsServiceImpl implements MaterialsService {
         material.setCourse(course);
         material.setTitle(request.getTitle());
         material.setDescription(request.getDescription());
-        material.setFilePath(filePath.toString());
+        material.setFilePath(fileName);
         material.setFileType(fileExtension);
         material.setVisibility(request.getVisibility());
         
@@ -135,12 +132,10 @@ public class MaterialsServiceImpl implements MaterialsService {
             throw new RuntimeException("Only the instructor can delete materials from this course");
         }
         
-        // Delete file from filesystem
-        try {
-            Path filePath = Paths.get(material.getFilePath());
+      try {
+           Path filePath = Paths.get(uploadDir).resolve(material.getFilePath());
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
-            // Log error but continue with database deletion
             System.err.println("Could not delete file: " + material.getFilePath());
         }
         
@@ -157,8 +152,9 @@ public class MaterialsServiceImpl implements MaterialsService {
         }
         
         try {
-            Path filePath = Paths.get(material.getFilePath());
+            Path filePath = Paths.get(uploadDir).resolve(material.getFilePath());
             Resource resource = new UrlResource(filePath.toUri());
+
             
             if (resource.exists() && resource.isReadable()) {
                 return resource;
@@ -175,17 +171,14 @@ public class MaterialsServiceImpl implements MaterialsService {
         Material material = materialRepository.findById(materialId)
                 .orElseThrow(() -> new RuntimeException("Material not found"));
         
-        // Instructor can access all materials in their course
         if (coursesService.isInstructorOfCourse(user, material.getCourse().getId())) {
             return true;
         }
         
-        // Public materials are accessible to everyone
         if (material.getVisibility() == Material.Visibility.PUBLIC) {
             return true;
         }
         
-        // Enrolled students can access ENROLLED materials
         if (material.getVisibility() == Material.Visibility.ENROLLED) {
             return coursesService.isStudentEnrolledInCourse(user, material.getCourse().getId());
         }
@@ -205,22 +198,20 @@ public class MaterialsServiceImpl implements MaterialsService {
         dto.setVisibility(material.getVisibility());
         dto.setUploadedAt(material.getUploadedAt());
         
-        // Extract filename from filepath
         if (material.getFilePath() != null) {
             String fileName = Paths.get(material.getFilePath()).getFileName().toString();
-            // Remove UUID prefix
             if (fileName.contains("_")) {
                 fileName = fileName.substring(fileName.indexOf("_") + 1);
             }
             dto.setFileName(fileName);
         }
         
-        // Get file size
         try {
-            Path filePath = Paths.get(material.getFilePath());
-            if (Files.exists(filePath)) {
-                dto.setFileSize(Files.size(filePath));
-            }
+          Path filePath = Paths.get(uploadDir).resolve(material.getFilePath());
+          if (Files.exists(filePath)) {
+             dto.setFileSize(Files.size(filePath));
+           }
+
         } catch (IOException e) {
             dto.setFileSize(0L);
         }

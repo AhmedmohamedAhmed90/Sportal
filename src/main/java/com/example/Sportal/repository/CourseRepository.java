@@ -21,17 +21,22 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     
     boolean existsByCode(String code);
     
-    @Query("SELECT c FROM Course c WHERE c.visibility = 'PUBLIC' OR c.instructor = :user")
+    @Query("""
+       SELECT DISTINCT c
+       FROM Course c
+       LEFT JOIN c.enrollments e
+       WHERE c.visibility = com.example.Sportal.models.entities.Course.Visibility.PUBLIC
+          OR c.instructor = :user
+          OR e.student = :user
+       """)
     List<Course> findVisibleCoursesForUser(@Param("user") User user);
-    
+
     @Query("SELECT c FROM Course c JOIN c.enrollments e WHERE e.student = :student AND e.status = 'ENROLLED'")
     List<Course> findEnrolledCoursesForStudent(@Param("student") User student);
     
-    // Simple method to test basic query functionality
     @Query("SELECT c FROM Course c WHERE c.visibility = 'PUBLIC'")
     List<Course> findPublicCourses();
     
-    // Simple method to get all courses for debugging
     @Query("SELECT c FROM Course c")
     List<Course> findAllCourses();
 }
