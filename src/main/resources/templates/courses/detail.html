@@ -43,7 +43,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="/assignments" >
+                    <a class="nav-link active" href="/assignments" th:if="${user.role.name() == 'INSTRUCTOR'}">
                         <i class="fas fa-tasks me-1"></i>Assignments
                     </a>
                 </li>
